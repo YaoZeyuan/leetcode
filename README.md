@@ -1,2 +1,3 @@
 # leetcode
-leetcode 题解
+
+leetcode 题解, 目标是刷够100道题
