@@ -10,7 +10,7 @@ let roman_int_map = {
 }
 
 /**
- * 关键点在于: 罗马数字只有左边一位可能会构成减法, 这是解题的关键
+ * 关键点在于: 罗马数字中, 放在大数的左边只能用一个, 这是解题的关键
  * @param roman
  * @return {*}
  */
@@ -21,7 +21,6 @@ function roman2int (roman) {
     }else{
       return roman_int_map[roman.slice(1,2)] - roman_int_map[roman[0]] + roman2int(roman.slice(2))
     }
-
   }else{
     return roman_int_map[roman]
   }
