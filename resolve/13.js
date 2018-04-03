@@ -9,6 +9,11 @@ let roman_int_map = {
   '' : 0, // 没有表示0
 }
 
+/**
+ * 关键点在于: 罗马数字只有左边一位可能会构成减法, 这是解题的关键
+ * @param roman
+ * @return {*}
+ */
 function roman2int (roman) {
   if(roman.length > 1){
     if(roman_int_map[roman[0]] >= roman_int_map[roman.slice(1,2)]){
