@@ -1,5 +1,8 @@
+// 水容量应该用高度的最小值
 let computeArea = function (point1, point2) {
-  return (point1.y + point2.y) * Math.abs(point1.x  - point2.x) / 2
+  let min_height = Math.min(point1.y , point2.y)
+
+  return min_height * Math.abs(point1.x  - point2.x)
 }
 
 let transferInput2List = function(input_list){
