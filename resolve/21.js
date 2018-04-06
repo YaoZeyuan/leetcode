@@ -1,3 +1,5 @@
+
+
 function list2Array (header) {
   let result = []
   while(header !== null){
