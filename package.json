@@ -1,0 +1,25 @@
+{
+  "name": "leetcode",
+  "version": "1.0.0",
+  "description": "leetcode 题解, 目标是刷够100道题",
+  "main": "index.js",
+  "scripts": {
+    "watch": "babel --watch resolve --out-dir dist  --source-maps --extensions \".ts,.tsx,.js,.jsx\"",
+    "build": "babel  resolve --out-dir dist  --source-maps --extensions \".ts,.tsx,.js,.jsx\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YaoZeyuan/leetcode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YaoZeyuan/leetcode/issues"
+  },
+  "homepage": "https://github.com/YaoZeyuan/leetcode#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.1",
+    "@babel/preset-typescript": "^7.10.1"
+  }
+}
