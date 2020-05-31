@@ -3,22 +3,21 @@
  * @return {number}
  */
 var firstMissingPositive = function (nums) {
-  let item = 1;
-  // 只处理正整数
-  let positiveList = nums.filter((x) => x > 0);
-  positiveList.sort((a, b) => a - b);
-  console.log(positiveList.join(","));
-  for (let num of positiveList) {
-    if (item < num) {
-      return item;
-    } else {
-      if (item <= num) {
-        item++;
-      }
+  let map = [];
+  // 将nums映射为数组
+  for (let num of nums) {
+    if (num > 0) {
+      map[num] = 1;
     }
   }
-  return item;
+  // 寻找数组中, 第一个未出现的整数index
+  for (let i = 1; i < nums.length + 1; i++) {
+    if (map[i] === undefined) {
+      return i;
+    }
+  }
+  return nums.length + 1;
 };
 
-let result = firstMissingPositive([1, 1, 5, 2, 2, 4, 0]);
+let result = firstMissingPositive([1,1,1]);
 console.log("result =>", result);

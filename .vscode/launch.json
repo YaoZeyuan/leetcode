@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "启动程序",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\resolve\\37.ts",
+      "program": "${file}",
       "outFiles": ["${workspaceFolder}/dist/*.js"]
     }
   ]
