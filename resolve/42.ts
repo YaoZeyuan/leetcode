@@ -82,12 +82,44 @@ var trap = function (height: number[]) {
         if (
           lastItem <= currentItem &&
           currentItem > nextItem &&
-          // 变化点至少要比前后两个元素中的一个高
           (currentItem >= lastSplitItemHeight ||
             currentItem >= finalSplitItemHeight)
         ) {
           changeIndexAtList.push(i);
           lastSplitIndex = i;
+        }
+      }
+    }
+
+    let isChangeHappen = true;
+    let newChangeIndexList = [];
+    while (isChangeHappen) {
+      // 本轮发生变动, 则再改为true
+      isChangeHappen = false;
+      newChangeIndexList = [changeIndexAtList[0]];
+
+      for (let indexAt = 1; indexAt < changeIndexAtList.length - 1; indexAt++) {
+        let leftCheckIndexAt = changeIndexAtList[indexAt - 1];
+        let checkIndexAt = changeIndexAtList[indexAt];
+        let rightCheckIndexAt = changeIndexAtList[indexAt + 1];
+
+        let leftCheckPointHeight = itemList[leftCheckIndexAt];
+        let currentPointHeight = itemList[checkIndexAt];
+        let rightCheckPointHeight = itemList[rightCheckIndexAt];
+
+        if (
+          (leftCheckPointHeight < currentPointHeight ||
+            currentPointHeight > rightCheckPointHeight) === true
+        ) {
+          // 变化点应至少大于左右一个变化点的高度
+          newChangeIndexList.push(checkIndexAt);
+          isChangeHappen = false;
+        } else {
+          // 否则记录该变化, 跳过此轮循环
+          isChangeHappen = true;
+          let sliceList = changeIndexAtList.slice(indexAt + 1);
+          changeIndexAtList = [...newChangeIndexList, ...sliceList];
+          break;
         }
       }
     }
@@ -156,7 +188,35 @@ function testIt() {
   // let input = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
   // let input = [2,0,2];
   // let input = [5, 2, 1, 2, 1, 5];
-  let input = [5, 5, 1, 7, 1, 1, 5, 2, 7, 6];
+  // let input = [5, 5, 1, 7, 1, 1, 5, 2, 7, 6];
+  let input = [
+    6,
+    4,
+    2,
+    0,
+    3,
+    2,
+    0,
+    3,
+    1,
+    4,
+    5,
+    3,
+    2,
+    7,
+    5,
+    3,
+    0,
+    1,
+    2,
+    1,
+    3,
+    4,
+    6,
+    8,
+    1,
+    3,
+  ];
   let result = trap(input);
   console.log("result =>", result);
 }
