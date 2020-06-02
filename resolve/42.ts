@@ -63,18 +63,31 @@ var trap = function (height: number[]) {
 
       // 满足条件后, 查找里边的变化点(右边低于左边的点)
       // 从第二个值开始
+      let lastSplitIndex = firstChangeIndexAt;
+      let finalSplitIndex = lastChangeIndexAt;
       for (let i = firstChangeIndexAt + 1; i <= lastChangeIndexAt; i++) {
         let currentItem = itemList[i];
         let lastItem = itemList[i - 1];
         let nextItem = itemList[i + 1];
+
+        let lastSplitItemHeight = itemList[lastSplitIndex];
+        let finalSplitItemHeight = itemList[finalSplitIndex];
+
         if (lastItem === undefined || nextItem === undefined) {
           lastItem = -1;
           nextItem = -1;
           // continue;
         }
         // 寻找右边低于左边的点
-        if (lastItem <= currentItem && currentItem > nextItem) {
+        if (
+          lastItem <= currentItem &&
+          currentItem > nextItem &&
+          // 变化点至少要比前后两个元素中的一个高
+          (currentItem >= lastSplitItemHeight ||
+            currentItem >= finalSplitItemHeight)
+        ) {
           changeIndexAtList.push(i);
+          lastSplitItemHeight = i;
         }
       }
     }
@@ -142,7 +155,8 @@ var trap = function (height: number[]) {
 function testIt() {
   // let input = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
   // let input = [2,0,2];
-  let input = [5, 2, 1, 2, 1, 5];
+  // let input = [5, 2, 1, 2, 1, 5];
+  let input = [5, 5, 1, 7, 1, 1, 5, 2, 7, 6];
   let result = trap(input);
   console.log("result =>", result);
 }
