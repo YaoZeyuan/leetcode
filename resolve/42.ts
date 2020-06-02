@@ -87,7 +87,7 @@ var trap = function (height: number[]) {
             currentItem >= finalSplitItemHeight)
         ) {
           changeIndexAtList.push(i);
-          lastSplitItemHeight = i;
+          lastSplitIndex = i;
         }
       }
     }
