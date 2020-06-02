@@ -81,7 +81,7 @@ var trap = function (height: number[]) {
         // 寻找右边低于左边的点
         if (
           lastItem <= currentItem &&
-          currentItem > nextItem &&
+          currentItem >= nextItem &&
           (currentItem >= lastSplitItemHeight ||
             currentItem >= finalSplitItemHeight)
         ) {
@@ -189,34 +189,8 @@ function testIt() {
   // let input = [2,0,2];
   // let input = [5, 2, 1, 2, 1, 5];
   // let input = [5, 5, 1, 7, 1, 1, 5, 2, 7, 6];
-  let input = [
-    6,
-    4,
-    2,
-    0,
-    3,
-    2,
-    0,
-    3,
-    1,
-    4,
-    5,
-    3,
-    2,
-    7,
-    5,
-    3,
-    0,
-    1,
-    2,
-    1,
-    3,
-    4,
-    6,
-    8,
-    1,
-    3,
-  ];
+  // let input = [6,4,2,0,3,2,0,3,1,4,5,3,2,7,5,3,0,1,2,1,3,4,6,8,1,3];
+  let input = [3, 9, 2, 2, 8, 8, 7, 3];
   let result = trap(input);
   console.log("result =>", result);
 }
