@@ -45,7 +45,7 @@ var trap = function (height: number[]) {
     // 寻找最后一个右侧变化节点
     for (let i = itemList.length - 2; i > 0; i--) {
       let testItem = itemList[i];
-      if (testItem <= lastItem) {
+      if (testItem >= lastItem) {
         lastItem = testItem;
         continue;
       }
@@ -63,12 +63,14 @@ var trap = function (height: number[]) {
 
       // 满足条件后, 查找里边的变化点(右边低于左边的点)
       // 从第二个值开始
-      for (let i = firstChangeIndexAt + 1; i < lastChangeIndexAt; i++) {
+      for (let i = firstChangeIndexAt + 1; i <= lastChangeIndexAt; i++) {
         let currentItem = itemList[i];
         let lastItem = itemList[i - 1];
         let nextItem = itemList[i + 1];
         if (lastItem === undefined || nextItem === undefined) {
-          continue;
+          lastItem = -1;
+          nextItem = -1;
+          // continue;
         }
         // 寻找右边低于左边的点
         if (lastItem <= currentItem && currentItem > nextItem) {
@@ -138,7 +140,9 @@ var trap = function (height: number[]) {
 };
 
 function testIt() {
-  let input = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+  // let input = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+  // let input = [2,0,2];
+  let input = [5, 2, 1, 2, 1, 5];
   let result = trap(input);
   console.log("result =>", result);
 }
