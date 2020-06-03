@@ -36,6 +36,11 @@ function isMatch(s: string, p: string): boolean {
       // *可以匹配所有
       return true;
     }
+    while (newP.length > 0 && newP[0] === MuiltFlag) {
+      // 合并多个*
+      newP = newP.slice(1);
+    }
+
     // 依次检测s从去除0个到去除n个是否可以匹配
     // 只要能有一种情况可以匹配, 即为匹配成功
     for (let checkLength = 0; checkLength <= s.length; checkLength++) {
@@ -51,8 +56,8 @@ function isMatch(s: string, p: string): boolean {
 }
 
 function test() {
-  let s = "ho";
-  let p = "ho***";
+  let s = "aaabbbaabaaaaababaabaaabbabbbbbbbbaabababbabbbaaaaba";
+  let p = "a*******b";
   let result = isMatch(s, p);
   console.log("result =>", result);
 }
