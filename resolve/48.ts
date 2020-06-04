@@ -9,8 +9,9 @@ function rotate(matrix: number[][]): void {
   printIt(matrix);
   for (let level = 0; level <= MaxYLevel; level = level + 1) {
     let levelXLength = XLength - level * 2 - 1;
-    const MaxXLevel = Math.ceil(levelXLength / 2);
-    for (let xOffset = 0; xOffset <= MaxXLevel; xOffset = xOffset + 1) {
+    const MaxXOffset = levelXLength;
+    console.log("current level => ", level);
+    for (let xOffset = 0; xOffset < MaxXOffset; xOffset = xOffset + 1) {
       let P00Item_X = xOffset + level;
       let P00Item_Y = level;
 
@@ -61,7 +62,7 @@ function test() {
     }
     return result;
   }
-  let input = generateIt(4);
+  let input = generateIt(6);
 
   rotate(input);
   printIt(input);
