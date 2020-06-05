@@ -5,12 +5,12 @@ function rotate(matrix: number[][]): void {
   const XLength = matrix.length;
   const YLength = matrix[0].length;
   const MaxYLevel = Math.ceil(YLength / 2 - 1);
-  console.log("↓↓↓↓---old---↓↓↓↓");
-  printIt(matrix);
+//   console.log("↓↓↓↓---old---↓↓↓↓");
+//   printIt(matrix);
   for (let level = 0; level <= MaxYLevel; level = level + 1) {
     let levelXLength = XLength - level * 2 - 1;
     const MaxXOffset = levelXLength;
-    console.log("current level => ", level);
+    // console.log("current level => ", level);
     for (let xOffset = 0; xOffset < MaxXOffset; xOffset = xOffset + 1) {
       let P00Item_X = xOffset + level;
       let P00Item_Y = level;
@@ -35,8 +35,8 @@ function rotate(matrix: number[][]): void {
       matrix[PXXItem_Y][PXXItem_X] = PX0Item;
       matrix[P0XItem_Y][P0XItem_X] = PXXItem;
 
-      console.log("↓↓↓↓---new---↓↓↓↓");
-      printIt(matrix);
+    //   console.log("↓↓↓↓---new---↓↓↓↓");
+    //   printIt(matrix);
     }
   }
 }
