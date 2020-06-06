@@ -232,10 +232,10 @@ var totalNQueens = function (n: number) {
 
   tryIt(board, 1, initOptionList);
   console.log(`${globalSkipCounter}/${globalTryCounter}`);
-  gloablResultList.map((item, index) => {
-    console.log("index =>", index);
-    printQueenMap(item);
-  });
+  //   gloablResultList.map((item, index) => {
+  //     console.log("index =>", index);
+  //     printQueenMap(item);
+  //   });
   let result = [];
   for (let solve of gloablResultList) {
     result.push(solve.map((item) => item.join("")));
