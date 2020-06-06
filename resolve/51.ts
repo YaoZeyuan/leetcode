@@ -143,7 +143,7 @@ var solveNQueens = function (n: number) {
    */
   function generateInitOptionList(n: number) {
     let optionList: Option[] = [];
-    for (let x = 0; x < n ; x++) {
+    for (let x = 0; x < n; x++) {
       for (let y = 0; y < n; y++) {
         optionList.push({
           x,
@@ -186,8 +186,13 @@ var solveNQueens = function (n: number) {
       return;
     }
 
+    // 第n个皇后一定位于第n行
+    let needCheckOptionList = remainOptionList.filter(
+      (item) => item.y === currentDepth - 1
+    );
+
     // 否则, 继续向下探索
-    for (let option of remainOptionList) {
+    for (let option of needCheckOptionList) {
       globalTryCounter++;
 
       let currentOptionList = [
@@ -238,4 +243,4 @@ var solveNQueens = function (n: number) {
   return result;
 };
 
-solveNQueens(4);
+solveNQueens(8);
