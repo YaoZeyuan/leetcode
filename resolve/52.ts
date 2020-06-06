@@ -240,7 +240,7 @@ var totalNQueens = function (n: number) {
   for (let solve of gloablResultList) {
     result.push(solve.map((item) => item.join("")));
   }
-  return result;
+  return result.length || 0;
 };
 
 totalNQueens(8);
