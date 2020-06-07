@@ -83,6 +83,7 @@ function maxSubArray(nums: number[]): number {
       hasMerge = result.hasMerge;
     }
   }
+  // 简单贪心算法对[-5, 8, -5, 2, -3, 14, -26]无效
   let max = Number.MIN_SAFE_INTEGER;
   for (let item of mergedList) {
     if (item > max) {
@@ -93,7 +94,7 @@ function maxSubArray(nums: number[]): number {
 }
 
 function test() {
-  let a = [3, 0, 0, 2, 2];
+  let a = [-5, 8, -5, 1, 1, -3, 5, 5, -3, -3, 6, 4, -7, -4, -8, 0, -1, -6];
   let result = maxSubArray(a);
   console.log(result);
 }
