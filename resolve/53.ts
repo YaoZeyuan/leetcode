@@ -102,7 +102,7 @@ function maxSubArray(nums: number[]): number {
   while (mergeLength > 1) {
     let startIndexAt = 0;
     let endIndexAt = startIndexAt + mergeLength - 1;
-    while (endIndexAt < mergeResult.length) {
+    while (endIndexAt < mergeResult.length && startIndexAt < endIndexAt) {
       let rangeSum = sumIt(mergeResult, startIndexAt, endIndexAt);
       let isMoreThanAll = true;
       for (let i = startIndexAt; i <= endIndexAt; i++) {
@@ -144,7 +144,7 @@ function maxSubArray(nums: number[]): number {
 }
 
 function test() {
-  let a = [-5, 8, -5, 1, 1, -3, 5, 5, -3, -3, 6, 4, -7, -4, -8, 0, -1, -6];
+  let a = [1, 2, -1, -2, 2, 1, -2, 1];
   let result = maxSubArray(a);
   console.log(result);
 }
