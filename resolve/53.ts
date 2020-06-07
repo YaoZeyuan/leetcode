@@ -100,7 +100,7 @@ function maxSubArray(nums: number[]): number {
 
     // 先从3个元素开始检查
     let checkLength = 3;
-    while (checkLength < mergedList.length) {
+    while (checkLength <= mergedList.length) {
       let startIndexAt = 0;
       let endIndexAt = startIndexAt + checkLength - 1;
       while (endIndexAt < mergedList.length && startIndexAt < endIndexAt) {
