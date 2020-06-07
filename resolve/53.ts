@@ -44,7 +44,7 @@ function maxSubArray(nums: number[]): number {
   }
 
   // 首先检测是不是全为负数的数组
-  let isAllNegative = nums.filter((item) => item > 0).length > 0;
+  let isAllNegative = nums.filter((item) => item > 0).length === 0;
 
   let hasMerge = true;
   let mergedList = nums;
@@ -65,7 +65,7 @@ function maxSubArray(nums: number[]): number {
 }
 
 function test() {
-  let a = [0, -10000, 1, 2, 3, -4, -5, 4, -9, 5, 6, -19, 8, -7, 10, -8, 1];
+  let a = [31, -41, 59, 26, -53, 58, 97, -93, -23, 84];
   let result = maxSubArray(a);
   console.log(result);
 }
