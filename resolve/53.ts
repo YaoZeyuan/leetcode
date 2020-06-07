@@ -11,6 +11,30 @@ function maxSubArray(nums: number[]): number {
   // 执行合并, 直到没有新合并发生, 此时最大的整数即为最大子序和(支持负数的情况)
 
   function mergeIt(inputNums: number[]) {
+    // 处理特殊情况
+    if (inputNums.length === 2) {
+      let a = inputNums[0];
+      let b = inputNums[1];
+      if (a * b > 0) {
+        return {
+          mergedList: [a + b],
+          hasMerge: true,
+        };
+      }
+    }
+    if (inputNums.length === 3) {
+      let a = inputNums[0];
+      let b = inputNums[1];
+      let c = inputNums[2];
+      if (a > 0 && c > 0) {
+        if (a + b + c > a && a + b + c > c)
+          return {
+            mergedList: [a + b + c],
+            hasMerge: true,
+          };
+      }
+    }
+
     let mergedList = [];
     let hasMerge = false;
     let mergedAt = -1;
@@ -25,10 +49,12 @@ function maxSubArray(nums: number[]): number {
       if (a !== undefined && b !== undefined) {
         // 符号相同, 直接合并
         let condition_1 = a * b > 0;
+        // 有一项为0, 直接合并
+        let condition_2 = a * b === 0;
         // 符号不同, 需要abc三项存在, 且三项和大于每一项的值, 才应该合并
-        let condition_2 =
-          c > 0 && a + b + c > a && a + b + c > b && a + b + c > c;
-        if (condition_1 || condition_2) {
+        let condition_3 =
+          a > 0 && c > 0 && a + b + c > a && a + b + c > b && a + b + c > c;
+        if (condition_1 || condition_2 || condition_3) {
           mergedList[mergedAt] = mergedList[mergedAt] + b;
           hasMerge = true;
           // 跳过b项
@@ -48,10 +74,12 @@ function maxSubArray(nums: number[]): number {
 
   let hasMerge = true;
   let mergedList = nums;
+  console.log(mergedList.join(", "));
   if (isAllNegative === false) {
     while (hasMerge) {
       let result = mergeIt(mergedList);
       mergedList = result.mergedList;
+      console.log(mergedList.join(", "));
       hasMerge = result.hasMerge;
     }
   }
@@ -65,7 +93,7 @@ function maxSubArray(nums: number[]): number {
 }
 
 function test() {
-  let a = [31, -41, 59, 26, -53, 58, 97, -93, -23, 84];
+  let a = [3, 0, 0, 2, 2];
   let result = maxSubArray(a);
   console.log(result);
 }
