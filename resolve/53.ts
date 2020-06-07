@@ -84,8 +84,58 @@ function maxSubArray(nums: number[]): number {
     }
   }
   // 简单贪心算法对[-5, 8, -5, 2, -3, 14, -26]无效
+  // 应该用复合贪心算法
+  // 首先: 对数组长度的组合进行合并: 1次, 如果合并后结果大于每个值, 则合并之
+  // 其次: 对数组长度的组合-1进行合并: 2次, 如果合并后结果大于每个值, 则合并之
+  // 一直到数组长度组合为1的情况
+  // 然后选出最大的数组
+  function sumIt(inputList: number[], startAt: number, endAt: number) {
+    let sum = 0;
+    for (let index = startAt; index <= endAt; index++) {
+      sum += inputList[index];
+    }
+    return sum;
+  }
+  // 在合并完成的基础上继续查找最大子序列
+  let mergeLength = mergedList.length;
+  let mergeResult = mergedList;
+  while (mergeLength > 1) {
+    let startIndexAt = 0;
+    let endIndexAt = startIndexAt + mergeLength - 1;
+    while (endIndexAt < mergeResult.length) {
+      let rangeSum = sumIt(mergeResult, startIndexAt, endIndexAt);
+      let isMoreThanAll = true;
+      for (let i = startIndexAt; i <= endIndexAt; i++) {
+        if (mergeResult[i] > rangeSum) {
+          isMoreThanAll = false;
+          break;
+        }
+      }
+
+      if (isMoreThanAll === false) {
+        // 继续检查下一个组合
+        startIndexAt++;
+        endIndexAt++;
+      } else {
+        // 进行合并操作
+        mergeResult = [
+          ...mergeResult.slice(0, startIndexAt),
+          rangeSum,
+          ...mergeResult.slice(endIndexAt + 1),
+        ];
+        // 打印合并后数组
+        console.log(mergeResult.join(", "));
+        // 重置长度
+        mergeLength = mergeResult.length;
+        startIndexAt = 0;
+        startIndexAt = startIndexAt + mergeLength - 1;
+      }
+    }
+    mergeLength = mergeLength - 1;
+  }
+
   let max = Number.MIN_SAFE_INTEGER;
-  for (let item of mergedList) {
+  for (let item of mergeResult) {
     if (item > max) {
       max = item;
     }
