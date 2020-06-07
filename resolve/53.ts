@@ -17,6 +17,7 @@ function maxSubArray(nums: number[]): number {
     for (let index = 0; index < inputNums.length; index++) {
       let a = inputNums[index];
       let b = inputNums[index + 1];
+      let c = inputNums[index + 2];
 
       mergedAt++;
       mergedList[mergedAt] = a;
@@ -24,8 +25,9 @@ function maxSubArray(nums: number[]): number {
       if (a !== undefined && b !== undefined) {
         // 符号相同, 直接合并
         let condition_1 = a * b > 0;
-        // 符号不同, 需要第三项存在且大于0, 且两项和大于0, 才应该合并
-        let condition_2 = inputNums[index + 2] > 0 && a + b > 0;
+        // 符号不同, 需要abc三项存在, 且三项和大于每一项的值, 才应该合并
+        let condition_2 =
+          c > 0 && a + b + c > a && a + b + c > b && a + b + c > c;
         if (condition_1 || condition_2) {
           mergedList[mergedAt] = mergedList[mergedAt] + b;
           hasMerge = true;
@@ -41,12 +43,17 @@ function maxSubArray(nums: number[]): number {
     };
   }
 
+  // 首先检测是不是全为负数的数组
+  let isAllNegative = nums.filter((item) => item > 0).length > 0;
+
   let hasMerge = true;
   let mergedList = nums;
-  while (hasMerge) {
-    let result = mergeIt(mergedList);
-    mergedList = result.mergedList;
-    hasMerge = result.hasMerge;
+  if (isAllNegative === false) {
+    while (hasMerge) {
+      let result = mergeIt(mergedList);
+      mergedList = result.mergedList;
+      hasMerge = result.hasMerge;
+    }
   }
   let max = Number.MIN_SAFE_INTEGER;
   for (let item of mergedList) {
@@ -58,7 +65,8 @@ function maxSubArray(nums: number[]): number {
 }
 
 function test() {
-  let a = [0, -10000, 20, -19, 8, -7, 10, -8, 1];
+  let a = [0, -10000, 1, 2, 3, -4, -5, 4, -9, 5, 6, -19, 8, -7, 10, -8, 1];
   let result = maxSubArray(a);
   console.log(result);
 }
+test();
