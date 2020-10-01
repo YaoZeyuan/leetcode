@@ -1,24 +1,28 @@
 function largestRectangleArea(heights: number[]): number {
   let maxArea = 0;
+
   // 依次遍历每个可能的矩形, O(n²)时间内获得结果
   for (let currentIndex = 0; currentIndex < heights.length; currentIndex++) {
+    let minHeight = heights[currentIndex]
     for (let testAt = currentIndex; testAt < heights.length; testAt++) {
       // 底的长度
       let rangeLength = testAt - currentIndex + 1;
+      let testHeight = heights[testAt]
       // 最小高度
-      let rangeHeightList = heights.slice(currentIndex, testAt + 1);
+      minHeight = Math.min(minHeight, testHeight)
 
-      let area = Math.min(...rangeHeightList) * rangeLength;
+      let area = minHeight * rangeLength;
       maxArea = Math.max(area, maxArea);
     }
   }
   return maxArea;
 }
 
+console.log("start =>", Date.now())
 let result84 = largestRectangleArea(
-  //
-  [
-    0,
+    //
+    [
+        0,
     1,
     2,
     3,
@@ -20022,3 +20026,5 @@ let result84 = largestRectangleArea(
 );
 
 console.log("result =>", result84);
+console.log("end =>", Date.now())
+
