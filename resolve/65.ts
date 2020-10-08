@@ -1,7 +1,7 @@
 function isNumber(s: string): boolean {
   let inputStr = s;
   // 剔除空格
-  inputStr = inputStr.replace(/\s/g, "");
+  inputStr = inputStr.trim();
   // 先确保基本形式正确
   // 以下字符只能出现一次
   // -号可以出现两次, -3e-5
