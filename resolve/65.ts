@@ -34,13 +34,15 @@ function isNumber(s: string): boolean {
 
   // 可以开始正常处理了
 
-  // 带e, 前缀带小数点
-  let case1 = /^(\+|-)?\d+\.\d+(e-?\d+)$/.test(inputStr);
-  // 带e, 前缀不带小数点
-  let case2 = /^(\+|-)?\d+(e-?\d+)$/.test(inputStr);
+  // 带e
+  let case1 = /^(\+|-)?(\d+)?\.?\d+(e-?\d+)$/.test(inputStr);
+  // 带e且小数点后没数字
+  let case2 = /^(\+|-)?(\d+)\.?(e-?\d+)$/.test(inputStr);
   // 不带e
   let case3 = /^(\+|-)?(\d+)?\.?\d+$/.test(inputStr);
-  if (case1 || case2 || case3) {
+  // 不带ee且小数点后没数字
+  let case4 = /^(\+|-)?(\d+)\.?$/.test(inputStr);
+  if (case1 || case2 || case3 || case4) {
     return true;
   }
   return false;
