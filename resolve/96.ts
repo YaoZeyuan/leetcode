@@ -1,108 +1,42 @@
-class TreeNode {
-  val: number;
-  left: TreeNode | null;
-  right: TreeNode | null;
-  constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
-    this.val = val === undefined ? 0 : val;
-    this.left = left === undefined ? null : left;
-    this.right = right === undefined ? null : right;
-  }
-}
-
-// 同95题, 暴力生成所有case后得解
-// 当然, 需要进行简单优化
+// 题目本质是卡特兰数
 function numTrees(n: number): number {
   // 不存在该情况
   if (n < 1) {
     return 0;
   }
-  let resultMap: Map<string, TreeNode | null> = new Map();
-  // 缓存中间结果
-  let cacheMap: Map<string, TreeNode> = new Map();
 
-  // 基于中序遍历生成二叉搜索树的key, 便于检测唯一性
-  function generateKey(node: TreeNode | null): string {
-    if (node === null) {
-      return "null";
+  function getCount(optionList: number[]) {
+    switch (optionList.length) {
+      case 0:
+        // null 的情况
+        return 1;
+      case 1:
+        return 1;
+      case 2:
+        return 2;
+      case 3:
+        return 5;
     }
-    return `${node.val},${generateKey(node.left)},${generateKey(node.right)}`;
-  }
-  // 复制节点
-  function copyNode(node: TreeNode | null): TreeNode | null {
-    if (node === null) {
-      return null;
-    }
-    let newNode = new TreeNode(node.val, null, null);
-    newNode.left = copyNode(node.left);
-    newNode.right = copyNode(node.right);
-    return newNode;
-  }
 
-  function addItemIntoNode(
-    head: TreeNode | null,
-    option: number
-  ): TreeNode | null {
-    if (head === null) {
-      return null;
-    }
-    let currentNode = head;
-    while (currentNode !== null) {
-      if (option > currentNode.val) {
-        if (currentNode.right === null) {
-          currentNode.right = new TreeNode(option, null, null);
-          return head;
-        } else {
-          currentNode = currentNode.right;
-        }
-      } else {
-        if (currentNode.left === null) {
-          currentNode.left = new TreeNode(option, null, null);
-          return head;
-        } else {
-          currentNode = currentNode.left;
-        }
-      }
-    }
-    return currentNode;
-  }
-
-  function generateNodeTree(head: TreeNode | null, optionList: number[]): void {
-    if (optionList.length === 0) {
-      // 添加完成
-      let key = generateKey(head);
-      //   console.log("key =>", key)
-      //   console.log("head =>", head)
-      if (resultMap.has(key) === false) {
-        resultMap.set(key, head);
-      }
-      return;
-    }
-    // 否则, 则向head内添加数据
+    let countSum = 0;
     for (let i = 0; i < optionList.length; i++) {
       let option = optionList[i];
 
-      let otherOptionList = [...optionList];
-      // 移除第i位元素, 形成新optionList
-      otherOptionList.splice(i, 1);
-      let newHead = copyNode(head);
-      if (head === null) {
-        newHead = new TreeNode(option, null, null);
-        generateNodeTree(newHead, otherOptionList);
-      } else {
-        // 将当前option加到TreeNode树中
-        addItemIntoNode(newHead, option);
-        generateNodeTree(newHead, otherOptionList);
-      }
+      let leftOptionList = optionList.filter((item) => item < option);
+      let rightOptionList = optionList.filter((item) => item > option);
+      let leftCount = getCount(leftOptionList);
+      let rightCount = getCount(rightOptionList);
+      countSum += leftCount * rightCount;
     }
+    return countSum;
   }
-
   let optionList = [];
   for (let i = 1; i <= n; i++) {
     optionList.push(i);
   }
-  generateNodeTree(null, optionList);
-  return resultMap.size;
+
+  return getCount(optionList);
 }
 
-let result96 = numTrees(10);
+let result96 = numTrees(5);
 console.log(result96);
