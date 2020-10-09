@@ -23,6 +23,10 @@ class TreeNode {
  */
 
 function generateTrees(n: number): Array<TreeNode | null> {
+  // 不存在该情况
+  if (n < 1) {
+    return [];
+  }
   let resultMap: Map<string, TreeNode | null> = new Map();
 
   // 基于中序遍历生成二叉搜索树的key, 便于检测唯一性
@@ -30,7 +34,7 @@ function generateTrees(n: number): Array<TreeNode | null> {
     if (node === null) {
       return "null";
     }
-    return `${generateKey(node.left)},${node.val},${generateKey(node.right)}`;
+    return `${node.val},${generateKey(node.left)},${generateKey(node.right)}`;
   }
   // 复制节点
   function copyNode(node: TreeNode | null): TreeNode | null {
@@ -52,7 +56,7 @@ function generateTrees(n: number): Array<TreeNode | null> {
     }
     let currentNode = head;
     while (currentNode !== null) {
-      if (option > head.val) {
+      if (option > currentNode.val) {
         if (currentNode.right === null) {
           currentNode.right = new TreeNode(option, null, null);
           return head;
@@ -75,6 +79,8 @@ function generateTrees(n: number): Array<TreeNode | null> {
     if (optionList.length === 0) {
       // 添加完成
       let key = generateKey(head);
+      //   console.log("key =>", key)
+      //   console.log("head =>", head)
       if (resultMap.has(key) === false) {
         resultMap.set(key, head);
       }
@@ -111,5 +117,5 @@ function generateTrees(n: number): Array<TreeNode | null> {
   return resultList;
 }
 
-let result95 = generateTrees(8);
+let result95 = generateTrees(3);
 console.log(result95.length);
