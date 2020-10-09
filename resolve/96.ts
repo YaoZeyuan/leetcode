@@ -1,10 +1,24 @@
+class TreeNode {
+  val: number;
+  left: TreeNode | null;
+  right: TreeNode | null;
+  constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+    this.val = val === undefined ? 0 : val;
+    this.left = left === undefined ? null : left;
+    this.right = right === undefined ? null : right;
+  }
+}
+
 // 同95题, 暴力生成所有case后得解
+// 当然, 需要进行简单优化
 function numTrees(n: number): number {
   // 不存在该情况
   if (n < 1) {
     return 0;
   }
   let resultMap: Map<string, TreeNode | null> = new Map();
+  // 缓存中间结果
+  let cacheMap: Map<string, TreeNode> = new Map();
 
   // 基于中序遍历生成二叉搜索树的key, 便于检测唯一性
   function generateKey(node: TreeNode | null): string {
@@ -89,3 +103,6 @@ function numTrees(n: number): number {
   generateNodeTree(null, optionList);
   return resultMap.size;
 }
+
+let result96 = numTrees(10);
+console.log(result96);
