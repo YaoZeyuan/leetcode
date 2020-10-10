@@ -1,5 +1,5 @@
 function numDecodings(s: string): number {
-  let cacheMap: Map<string, Set<string>> = new Map();
+  let cacheMap: Map<string, number> = new Map();
   let keyDict: { [key: string]: string } = {};
   let callCounter = 0;
 
@@ -8,46 +8,39 @@ function numDecodings(s: string): number {
     keyDict[`${i + 1}`] = String.fromCharCode("A".charCodeAt(0) + i);
   }
 
-  function getCodeCount(
-    inputStr: string,
-    encodeStrSet: Set<string> = new Set()
-  ): Set<string> {
+  function getCodeCount(inputStr: string): number {
     callCounter++;
 
-    console.log("inputStr =>", inputStr);
-    console.log("inputStr.length =>", inputStr.length);
+    // console.log("inputStr =>", inputStr);
+    // console.log("inputStr.length =>", inputStr.length);
     if (cacheMap.has(inputStr)) {
-      return cacheMap.get(inputStr) as Set<string>;
+      return cacheMap.get(inputStr) as number;
     }
 
     switch (inputStr.length) {
       case 0:
-        return encodeStrSet;
+        return 0;
       case 1:
         if (inputStr !== "0") {
-          let lastChar = keyDict[inputStr];
-          encodeStrSet.add(lastChar);
-          return encodeStrSet;
+          //   let lastChar = keyDict[inputStr];
+          //   encodeStrSet.add(lastChar);
+          return 1;
         } else {
-          return encodeStrSet;
+          return 0;
         }
     }
 
     let char_1 = inputStr.slice(0, 1);
     let char_1_remain = inputStr.slice(1);
-    let char_1_set: Set<string> = new Set();
+    let char_1_count = 0;
     if (char_1 !== "0") {
-      let char_1_at = keyDict[char_1];
-      char_1_set = getCodeCount(char_1_remain);
-      if (char_1_set.size > 0) {
-        for (let encodeStr of char_1_set) {
-          encodeStrSet.add(char_1_at + encodeStr);
-        }
-      } else {
+      char_1_count = getCodeCount(char_1_remain);
+      if (char_1_count <= 0) {
         if (char_1_remain.length === 0) {
-          encodeStrSet.add(char_1_at);
+          char_1_count = 1;
         } else {
           // 该分割方案不可行
+          char_1_count = 0;
         }
       }
     }
@@ -55,30 +48,35 @@ function numDecodings(s: string): number {
     let char_2 = inputStr.slice(0, 2);
     let char_2_remain = inputStr.slice(2);
     let char_2_at = keyDict[char_2];
-    let char_2_set: Set<string> = new Set();
+    let char_2_count = 0;
     if (char_2_at !== undefined) {
-      char_2_set = getCodeCount(char_2_remain);
-      if (char_2_set.size > 0) {
-        for (let encodeStr of char_2_set) {
-          encodeStrSet.add(char_2_at + encodeStr);
-        }
-      } else {
+      char_2_count = getCodeCount(char_2_remain);
+      if (char_2_count <= 0) {
         if (char_2_remain.length === 0) {
-          encodeStrSet.add(char_2_at);
+          char_2_count = 1;
         } else {
           // 该分割方案不可行
+          char_2_count = 0;
         }
       }
     }
-    cacheMap.set(inputStr, encodeStrSet);
+    cacheMap.set(inputStr, char_1_count + char_2_count);
 
-    return encodeStrSet;
+    return char_1_count + char_2_count;
   }
 
   let set = getCodeCount(s);
   console.log("callCounter => ", callCounter);
-  return set.size;
+  return set;
 }
 
-let result91 = numDecodings("111111111111111111111111111111111111111111111");
+let result91 = numDecodings(
+  "111111111111111111111111111111111111111111111111111111111111111"
+);
 console.log("result91 =>", result91);
+
+// ABBBBB
+// ABBBBB
+// AKAKA
+// 1111111
+// AKAKA
