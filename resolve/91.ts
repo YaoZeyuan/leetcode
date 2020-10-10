@@ -14,6 +14,8 @@ function numDecodings(s: string): number {
   ): Set<string> {
     callCounter++;
 
+    console.log("inputStr =>", inputStr);
+    console.log("inputStr.length =>", inputStr.length);
     if (cacheMap.has(inputStr)) {
       return cacheMap.get(inputStr) as Set<string>;
     }
@@ -37,8 +39,16 @@ function numDecodings(s: string): number {
     if (char_1 !== "0") {
       let char_1_at = keyDict[char_1];
       char_1_set = getCodeCount(char_1_remain);
-      for (let encodeStr of char_1_set) {
-        encodeStrSet.add(char_1_at + encodeStr);
+      if (char_1_set.size > 0) {
+        for (let encodeStr of char_1_set) {
+          encodeStrSet.add(char_1_at + encodeStr);
+        }
+      } else {
+        if (char_1_remain.length === 0) {
+          encodeStrSet.add(char_1_at);
+        } else {
+          // 该分割方案不可行
+        }
       }
     }
 
@@ -48,8 +58,16 @@ function numDecodings(s: string): number {
     let char_2_set: Set<string> = new Set();
     if (char_2_at !== undefined) {
       char_2_set = getCodeCount(char_2_remain);
-      for (let encodeStr of char_2_set) {
-        encodeStrSet.add(char_2_at + encodeStr);
+      if (char_2_set.size > 0) {
+        for (let encodeStr of char_2_set) {
+          encodeStrSet.add(char_2_at + encodeStr);
+        }
+      } else {
+        if (char_2_remain.length === 0) {
+          encodeStrSet.add(char_2_at);
+        } else {
+          // 该分割方案不可行
+        }
       }
     }
     cacheMap.set(inputStr, encodeStrSet);
@@ -62,5 +80,5 @@ function numDecodings(s: string): number {
   return set.size;
 }
 
-let result91 = numDecodings("11111");
+let result91 = numDecodings("111111111111111111111111111111111111111111111");
 console.log("result91 =>", result91);
