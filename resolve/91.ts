@@ -1,51 +1,66 @@
 function numDecodings(s: string): number {
-  let cacheMap = new Map();
+  let cacheMap: Map<string, Set<string>> = new Map();
   let keyDict: { [key: string]: string } = {};
+  let callCounter = 0;
 
   // 生成26个字母对应表
   for (let i = 0; i < 26; i++) {
     keyDict[`${i + 1}`] = String.fromCharCode("A".charCodeAt(0) + i);
   }
 
-  function getCodeCount(inputStr: string, encodeStr: string): void {
+  function getCodeCount(
+    inputStr: string,
+    encodeStrSet: Set<string> = new Set()
+  ): Set<string> {
+    callCounter++;
+
+    if (cacheMap.has(inputStr)) {
+      return cacheMap.get(inputStr) as Set<string>;
+    }
+
     switch (inputStr.length) {
       case 0:
-        if (encodeStr !== "") {
-          cacheMap.set(encodeStr, 1);
-        }
-        return;
+        return encodeStrSet;
       case 1:
         if (inputStr !== "0") {
           let lastChar = keyDict[inputStr];
-          cacheMap.set(encodeStr + lastChar, 1);
-          return;
+          encodeStrSet.add(lastChar);
+          return encodeStrSet;
         } else {
-          if (encodeStr !== "") {
-            cacheMap.set(encodeStr, 1);
-          }
-          return;
+          return encodeStrSet;
         }
     }
 
     let char_1 = inputStr.slice(0, 1);
     let char_1_remain = inputStr.slice(1);
+    let char_1_set: Set<string> = new Set();
     if (char_1 !== "0") {
       let char_1_at = keyDict[char_1];
-      getCodeCount(char_1_remain, encodeStr + char_1_at);
+      char_1_set = getCodeCount(char_1_remain);
+      for (let encodeStr of char_1_set) {
+        encodeStrSet.add(char_1_at + encodeStr);
+      }
     }
 
     let char_2 = inputStr.slice(0, 2);
     let char_2_remain = inputStr.slice(2);
     let char_2_at = keyDict[char_2];
+    let char_2_set: Set<string> = new Set();
     if (char_2_at !== undefined) {
-      getCodeCount(char_2_remain, encodeStr + char_2_at);
+      char_2_set = getCodeCount(char_2_remain);
+      for (let encodeStr of char_2_set) {
+        encodeStrSet.add(char_2_at + encodeStr);
+      }
     }
-    return;
+    cacheMap.set(inputStr, encodeStrSet);
+
+    return encodeStrSet;
   }
 
-  getCodeCount(s, "");
-  return cacheMap.size;
+  let set = getCodeCount(s);
+  console.log("callCounter => ", callCounter);
+  return set.size;
 }
 
-let result91 = numDecodings("0123456789");
+let result91 = numDecodings("11111");
 console.log("result91 =>", result91);
