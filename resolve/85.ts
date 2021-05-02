@@ -21,7 +21,7 @@ function maximalRectangle(matrix: string[][]): number {
         return 0
     }
     let matrixMap = new Map<string, {
-        matrix: TypeMatrix,
+        // matrix: TypeMatrix,
         size: number,
         isLegal: boolean,
     }>()
@@ -47,9 +47,9 @@ function maximalRectangle(matrix: string[][]): number {
                     matrixMap.set(testMatrixKey, {
                         isLegal: false,
                         size: 0,
-                        matrix: {
-                            ...testMatrix
-                        },
+                        // matrix: {
+                        //     ...testMatrix
+                        // },
                     })
                     return false
                 }
@@ -58,9 +58,9 @@ function maximalRectangle(matrix: string[][]): number {
         matrixMap.set(testMatrixKey, {
             isLegal: true,
             size: (testMatrix.endX - testMatrix.startX + 1) * (testMatrix.endY - testMatrix.startY + 1),
-            matrix: {
-                ...testMatrix
-            },
+            // matrix: {
+            //     ...testMatrix
+            // },
         })
         return true
     }
