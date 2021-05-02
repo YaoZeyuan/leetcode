@@ -12,7 +12,11 @@ function getMatrixKey(matrixDefine: TypeMatrix) {
 function maximalRectangle(matrix: string[][]): number {
     let height = matrix.length
     let width = matrix[0].length
-    let matrixMap = new Map<string, TypeMatrix>()
+    let matrixMap = new Map<string, {
+        matrix: TypeMatrix,
+        size: number,
+        isLegal: boolean,
+    }>()
 
     // 按x/y获取矩阵节点, 符合习惯
     function getMatrixItem(x: number, y: number) {
@@ -25,19 +29,30 @@ function maximalRectangle(matrix: string[][]): number {
     function testMatrixLegalAndAppendIntoMatrixMap(testMatrix: TypeMatrix) {
         let testMatrixKey = getMatrixKey(testMatrix)
         if (matrixMap.has(testMatrixKey)) {
-            return true
+            return matrixMap.get(testMatrixKey).isLegal
         }
 
         // 不需要考虑小于0和大于宽高的情况, 我们是有节操的人, 不需要考虑防御式编程
         for (let testX = testMatrix.startX; testX <= testMatrix.endX; testX++) {
             for (let testY = testMatrix.startY; testY <= testMatrix.endY; testY++) {
                 if (getMatrixItem(testX, testY) === '0') {
+                    matrixMap.set(testMatrixKey, {
+                        isLegal: false,
+                        size: 0,
+                        matrix: {
+                            ...testMatrix
+                        },
+                    })
                     return false
                 }
             }
         }
         matrixMap.set(testMatrixKey, {
-            ...testMatrix
+            isLegal: true,
+            size: (testMatrix.endX - testMatrix.startX + 1) * (testMatrix.endY - testMatrix.startY + 1),
+            matrix: {
+                ...testMatrix
+            },
         })
         return true
     }
@@ -155,10 +170,11 @@ function maximalRectangle(matrix: string[][]): number {
 
     // 第二部, 判断所有矩阵列表, 给出最大体积
     let maxMatrixSize = 0
-    for (let matrix of matrixMap.values()) {
-        let size = (matrix.endX - matrix.startX + 1) * (matrix.endY - matrix.startY + 1)
-        if (size > maxMatrixSize) {
-            maxMatrixSize = size
+    for (let config of matrixMap.values()) {
+        if (config.isLegal === true) {
+            if (config.size > maxMatrixSize) {
+                maxMatrixSize = config.size
+            }
         }
     }
     return maxMatrixSize
@@ -171,10 +187,25 @@ let testCase = {
         ["1", "1", "1", "1", "1"],
         ["1", "0", "0", "1", "0"]
     ],
-    '测试': [['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '0', '1'], ['1', '1', '1']]
+    '测试': [['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '0', '1'], ['1', '1', '1']],
+    "测试-2": [
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+    ],
+    "测试-3": []
 }
 
-let result = maximalRectangle(testCase.官方)
+let result = maximalRectangle(testCase['测试-3'])
 
 
 console.log(result)
