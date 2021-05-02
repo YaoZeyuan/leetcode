@@ -58,21 +58,35 @@ function maximalRectangle(matrix: string[][]): number {
         // 先测x轴
 
         // 测最小startX
-        testMatrix.startX = testMatrix.startX - 1
-        while (testResult === true && testMatrix.startX > 0) {
-            testResult = testMatrixLegalAndAppendIntoMatrixMap(testMatrix);
-            testMatrix.startX = testMatrix.startX - 1
+        let legalMinStartX = x - 1
+
+        while (testResult === true && legalMinStartX > 0) {
+            testResult = testMatrixLegalAndAppendIntoMatrixMap({
+                startX: legalMinStartX,
+                endX: x,
+                startY: y,
+                endY: y
+            });
+            if (testResult) {
+                legalMinStartX = legalMinStartX - 1
+            }
         }
-        let legalMinStartX = testMatrix.startX + 1
+        legalMinStartX = legalMinStartX + 1
         // 测最大endX
         testResult = true
-        testMatrix.startX = x
-        while (testResult === true && testMatrix.endX < width) {
-            testResult = testMatrixLegalAndAppendIntoMatrixMap(testMatrix);
-            testMatrix.endX = testMatrix.endX + 1
+        let legalMaxEndX = x + 1
+        while (testResult === true && legalMaxEndX < width) {
+            testResult = testMatrixLegalAndAppendIntoMatrixMap({
+                startX: x,
+                endX: legalMaxEndX,
+                startY: y,
+                endY: y
+            });
+            if (testResult) {
+                legalMaxEndX = legalMaxEndX + 1
+            }
         }
-        let legalMaxEndX = testMatrix.endX - 1
-
+        legalMaxEndX = legalMaxEndX - 1
         // 针对x轴上每一个可能的节点, 向两个方向测试最大的y
 
         // x轴的上下界
@@ -87,32 +101,36 @@ function maximalRectangle(matrix: string[][]): number {
             // 先不断递减startY, 直到非法, 找到startY的下界
 
             let isMatrixLegal = true
-            let testStartY = y
-            while (testStartY >= 0 && isMatrixLegal === true) {
-                isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
-                    startX: testStartX,
-                    endX: testEndX,
-                    startY: testStartY,
-                    endY: y
-                })
-                testStartY = testStartY - 1
-            }
-            let legalMinStartY = testStartY + 1
-
-            // 然后找到EndY的上界
-            // 不断递增endY, 直到非法
-            isMatrixLegal = true
-            let testEndY = y
-            while (testEndY < height && isMatrixLegal === true) {
+            let legalMinStartY = y
+            while (isMatrixLegal === true && legalMinStartY >= 0) {
                 isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
                     startX: testStartX,
                     endX: testEndX,
                     startY: legalMinStartY,
-                    endY: testEndY
+                    endY: y
                 })
-                testEndY = testEndY + 1
+                if (isMatrixLegal) {
+                    legalMinStartY = legalMinStartY - 1
+                }
             }
-            let legalMaxEndY = testEndY - 1
+            legalMinStartY = legalMinStartY + 1
+
+            // 然后找到EndY的上界
+            // 不断递增endY, 直到非法
+            isMatrixLegal = true
+            let legalMaxEndY = y
+            while (isMatrixLegal === true && legalMaxEndY < height) {
+                isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
+                    startX: testStartX,
+                    endX: testEndX,
+                    startY: legalMinStartY,
+                    endY: legalMaxEndY
+                })
+                if (isMatrixLegal) {
+                    legalMaxEndY = legalMaxEndY + 1
+                }
+            }
+            legalMaxEndY = legalMaxEndY - 1
             // 然后依次startX+1或endX减1, 缩小范围, 重复循环
             switch (nextStep) {
                 case "testStartX - 1":
@@ -146,5 +164,17 @@ function maximalRectangle(matrix: string[][]): number {
     return maxMatrixSize
 };
 
-let result = maximalRectangle([['1', '1', '1'], ['1', '0', '1'], ['1', '1', '1']])
+let testCase = {
+    "官方": [
+        ["1", "0", "1", "0", "0"],
+        ["1", "0", "1", "1", "1"],
+        ["1", "1", "1", "1", "1"],
+        ["1", "0", "0", "1", "0"]
+    ],
+    '测试': [['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '0', '1'], ['1', '1', '1']]
+}
+
+let result = maximalRectangle(testCase.官方)
+
+
 console.log(result)
