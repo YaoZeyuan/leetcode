@@ -114,7 +114,7 @@ function maximalRectangle(matrix: string[][]): number {
         let testStartX = legalMinStartX
         let testEndX = legalMaxEndX
 
-        let nextStep: 'testStartX - 1' | 'testEndX + 1' = 'testStartX - 1'
+        let nextStep: 'testStartX + 1' | 'testEndX - 1' = 'testStartX + 1'
         for (; testStartX >= 0 && testStartX <= x && testEndX >= x && testEndX < width;) {
             // 给定startX和endX, 求允许的y上下界
 
@@ -154,13 +154,13 @@ function maximalRectangle(matrix: string[][]): number {
             legalMaxEndY = legalMaxEndY - 1
             // 然后依次startX+1或endX减1, 缩小范围, 重复循环
             switch (nextStep) {
-                case "testStartX - 1":
-                    testStartX = testStartX - 1;
-                    nextStep = 'testEndX + 1'
+                case "testStartX + 1":
+                    testStartX = testStartX + 1;
+                    nextStep = 'testEndX - 1'
                     break;
-                case "testEndX + 1":
-                    testEndX = testEndX + 1
-                    nextStep = 'testStartX - 1'
+                case "testEndX - 1":
+                    testEndX = testEndX - 1
+                    nextStep = 'testStartX + 1'
                     break;
             }
         }
@@ -193,6 +193,17 @@ let testCase = {
         ["1", "1", "1", "1", "1"],
         ["1", "0", "0", "1", "0"]
     ],
+    "官方-2": [
+        ["0", "1", "1", "0", "0", "1", "0", "1", "0", "1"],
+        ["0", "0", "1", "0", "1", "0", "1", "0", "1", "0"],
+        ["1", "0", "0", "0", "0", "1", "0", "1", "1", "0"],
+        ["0", "1", "1", "1", "1", "1", "1", "0", "1", "0"],
+        ["0", "0", "1", "1", "1", "1", "1", "1", "1", "0"],
+        ["1", "1", "0", "1", "0", "1", "1", "1", "1", "0"],
+        ["0", "0", "0", "1", "1", "0", "0", "0", "1", "0"],
+        ["1", "1", "0", "1", "1", "0", "0", "1", "1", "1"],
+        ["0", "1", "0", "1", "1", "0", "1", "0", "1", "1"]
+    ],
     '测试': [['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '1', '1'], ['1', '0', '1'], ['1', '1', '1']],
     "测试-2": [
         ["1", "1", "1", "1", "1"],
@@ -211,7 +222,7 @@ let testCase = {
     "测试-3": []
 }
 
-let result = maximalRectangle(testCase['测试-3'])
+let result = maximalRectangle(testCase['官方-2'])
 
 
 console.log(result)
