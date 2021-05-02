@@ -8,6 +8,7 @@ type TypeMatrix = {
 function getMatrixKey(matrixDefine: TypeMatrix) {
     return `${matrixDefine.startX}_${matrixDefine.endX}_${matrixDefine.startY}_${matrixDefine.endY}`
 }
+let isStartXEndXInY_HasChecked = new Set<string>()
 
 function maximalRectangle(matrix: string[][]): number {
     let height = matrix.length
@@ -64,7 +65,7 @@ function maximalRectangle(matrix: string[][]): number {
     }
 
     // 第一步, 给定横纵坐标, 给出包含该节点下所有符合要求的矩阵列表
-    function getMatrixList(x: number, y: number) {
+    function generateAllMatrix(x: number, y: number) {
         // 先看x/y本身是不是一个矩阵
         let testMatrix: TypeMatrix = {
             startX: x,
@@ -116,42 +117,51 @@ function maximalRectangle(matrix: string[][]): number {
 
         let nextStep: 'testStartX + 1' | 'testEndX - 1' = 'testStartX + 1'
         for (; testStartX >= 0 && testStartX <= x && testEndX >= x && testEndX < width;) {
-            // 给定startX和endX, 求允许的y上下界
+            let checkKey = `${testStartX}_${testEndX}_${y}`
+            if (isStartXEndXInY_HasChecked.has(checkKey) === false) {
+                // 给定startX和endX, 求允许的y上下界
 
-            // 检测出基于testStartX和testEndX的y的上下界
-            // 先不断递减startY, 直到非法, 找到startY的下界
+                // 检测出基于testStartX和testEndX的y的上下界
+                // 先不断递减startY, 直到非法, 找到startY的下界
 
-            let isMatrixLegal = true
-            let legalMinStartY = y
-            while (isMatrixLegal === true && legalMinStartY >= 0) {
-                isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
-                    startX: testStartX,
-                    endX: testEndX,
-                    startY: legalMinStartY,
-                    endY: y
-                })
-                if (isMatrixLegal) {
-                    legalMinStartY = legalMinStartY - 1
+                let isMatrixLegal = true
+                let legalMinStartY = y
+                while (isMatrixLegal === true && legalMinStartY >= 0) {
+                    isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
+                        startX: testStartX,
+                        endX: testEndX,
+                        startY: legalMinStartY,
+                        endY: y
+                    })
+                    if (isMatrixLegal) {
+                        legalMinStartY = legalMinStartY - 1
+                    }
                 }
-            }
-            legalMinStartY = legalMinStartY + 1
+                legalMinStartY = legalMinStartY + 1
 
-            // 然后找到EndY的上界
-            // 不断递增endY, 直到非法
-            isMatrixLegal = true
-            let legalMaxEndY = y
-            while (isMatrixLegal === true && legalMaxEndY < height) {
-                isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
-                    startX: testStartX,
-                    endX: testEndX,
-                    startY: legalMinStartY,
-                    endY: legalMaxEndY
-                })
-                if (isMatrixLegal) {
-                    legalMaxEndY = legalMaxEndY + 1
+                // 然后找到EndY的上界
+                // 不断递增endY, 直到非法
+                isMatrixLegal = true
+                let legalMaxEndY = y
+                while (isMatrixLegal === true && legalMaxEndY < height) {
+                    isMatrixLegal = testMatrixLegalAndAppendIntoMatrixMap({
+                        startX: testStartX,
+                        endX: testEndX,
+                        startY: legalMinStartY,
+                        endY: legalMaxEndY
+                    })
+                    if (isMatrixLegal) {
+                        legalMaxEndY = legalMaxEndY + 1
+                    }
                 }
+                legalMaxEndY = legalMaxEndY - 1
+
+                // 标记这一横行已被检测过
+                isStartXEndXInY_HasChecked.add(checkKey)
             }
-            legalMaxEndY = legalMaxEndY - 1
+
+
+
             // 然后依次startX+1或endX减1, 缩小范围, 重复循环
             switch (nextStep) {
                 case "testStartX + 1":
@@ -170,7 +180,7 @@ function maximalRectangle(matrix: string[][]): number {
     // 遍历矩阵中每一个元素
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            getMatrixList(x, y)
+            generateAllMatrix(x, y)
         }
     }
 
