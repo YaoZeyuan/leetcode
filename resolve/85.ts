@@ -11,7 +11,13 @@ function getMatrixKey(matrixDefine: TypeMatrix) {
 
 function maximalRectangle(matrix: string[][]): number {
     let height = matrix.length
+    if (height === 0) {
+        return 0
+    }
     let width = matrix[0].length
+    if (width === 0) {
+        return 0
+    }
     let matrixMap = new Map<string, {
         matrix: TypeMatrix,
         size: number,
