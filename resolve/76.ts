@@ -1,179 +1,109 @@
 
-type Type_Match_Result = {
-    hasMatchedString: string,
-    matchResultList: (0 | 1)[], // 按字符串顺序, 1表示匹配到了, 0表示没有匹配到
-    isSuccess: boolean
-    startAt: number
-    endAt: number
-    skipCount: number // 跳过的元素数. 当跳过数为0时, 不可能再缩短
-}
+
 
 function minWindow(s: string, t: string): string {
+
+    // 频率统计
+    type Type_Time_Count = {
+        [key: string]: number
+    }
+    class MatchContainer {
+
+        private currentMatchCharList: string[] = []
+        /**
+         * 最短的可匹配字符
+         */
+        public minMatchCharList: string[] = []
+        private isCurrentMatchSuccess: boolean = false
+        // 是否曾经匹配成功过
+        public hasMatchSuccess: boolean = false
+
+        private templateTimeCount: Type_Time_Count = {}
+        private currentTimeCount: Type_Time_Count = {}
+        checkIsTimeCountLegal() {
+            for (let key of Object.keys(this.templateTimeCount)) {
+                if (this.currentTimeCount[key] === undefined || this.currentTimeCount[key] < this.templateTimeCount[key]) {
+                    return false
+                }
+            }
+            // 曾经匹配成功过
+            this.hasMatchSuccess = true
+            return true
+        }
+
+        public constructor(inputString: string, templateString: string) {
+            // 初始默认最小匹配模板为整个字符串(不可能比这个更长)
+            this.minMatchCharList = inputString.split("")
+            // 初始化模板字符串中字母频率统计表
+            for (let char of templateString) {
+                if (this.templateTimeCount[char]) {
+                    this.templateTimeCount[char]++
+                } else {
+                    this.templateTimeCount[char] = 1
+                }
+            }
+        }
+
+        private updateMinMatchCharList() {
+            if (this.isCurrentMatchSuccess === false) {
+                return
+            }
+            // 更新最短匹配字符串
+            if (this.minMatchCharList.length > this.currentMatchCharList.length) {
+                this.minMatchCharList = [...this.currentMatchCharList]
+            }
+        }
+
+        // 每次addChar前, 都会将对象处理为未匹配成功状态
+        public addChar(char: string) {
+            this.currentMatchCharList.push(char)
+            // 更新频率表数据
+            if (this.currentTimeCount[char]) {
+                this.currentTimeCount[char] = this.currentTimeCount[char] + 1
+            } else {
+                this.currentTimeCount[char] = 1
+            }
+            // 检查是否满足要求
+            this.isCurrentMatchSuccess = this.checkIsTimeCountLegal()
+            while (this.isCurrentMatchSuccess) {
+                // 如果匹配成功, 第一步, 更新最短匹配字符串
+                this.updateMinMatchCharList()
+                // 第二步, 从第一位起, 逐步弹出首位字符
+                let [popChar] = this.currentMatchCharList.splice(0, 1)
+                this.currentTimeCount[popChar] = this.currentTimeCount[popChar] - 1
+                // 然后再比较是否满足要求
+                this.isCurrentMatchSuccess = this.checkIsTimeCountLegal()
+            }
+            return
+        }
+
+
+
+        // 执行过程:
+        // 先构建第一个最小匹配
+        // 然后执行以下操作
+        // 1. 删除最小匹配的第一个元素, 检查剩余字符串是否可以满足最小匹配需求
+        //    1.  满足, 更新最小匹配字符串, 重新执行1-1
+        //    2.  不满足, 从剩余字符串中向最小匹配对象中添加一个字母, 检查是否满足匹配.
+        //        1.    不满足, 重新执行1-2
+        //        2.    满足, 执行1
+    }
+
+
     if (s.length === 0 || t.length === 0) {
         return ''
     }
 
-    // 从输入字符串左起第一位开始进行匹配, 当发现第一个和目标字符串中重合的字符后, 开始以下流程
-    // -  将输入字符串移除第一个匹配字符后剩余字符串作为匹配输入项, 目标字符串移除第一个匹配到的字符后的新字符作为新模板字符项, 作为新的函数, 进行递归调用, 最终得到最后满足要求的字符串长度
-    // -  将输入字符串移除第一个匹配字符后剩余字符串作为匹配输入项, 原目标字符串作为新模板字符项, 作为新的函数, 进行递归调用, 最终得到另一个可能符合要求的字符串长度
-    // -  比较两种路线下最短字符串长度, 返回符合要求的那款
-    function getMatchedSubStr(inputStr: string, templateStr: string): Type_Match_Result {
-        let matchResult: Type_Match_Result = {
-            hasMatchedString: '',
-            matchResultList: [],
-            isSuccess: false,
-            startAt: 0,
-            endAt: 0,
-            skipCount: 0,
-        }
-        if (templateStr === '' || inputStr.length < templateStr.length) {
-            return {
-                hasMatchedString: '',
-                matchResultList: [],
-                isSuccess: false,
-                startAt: 0,
-                endAt: 0,
-                skipCount: 0,
-            }
-        }
-        // 模板长度为1时不需要执行后边的循环流程
-        if (templateStr.length === 1) {
-            if (inputStr.includes(templateStr)) {
-                return {
-                    hasMatchedString: templateStr,
-                    matchResultList: [1],
-                    isSuccess: true,
-                    startAt: inputStr.indexOf(templateStr),
-                    endAt: inputStr.indexOf(templateStr),
-                    skipCount: 0,
-                }
-            } else {
-                return {
-                    hasMatchedString: '',
-                    matchResultList: [],
-                    isSuccess: false,
-                    startAt: 0,
-                    endAt: 0,
-                    skipCount: 0,
-                }
-            }
-        }
-        let templateCharList = templateStr.split("")
+    let matchContainer = new MatchContainer(s, t)
 
+    for (let char of s) {
+        matchContainer.addChar(char)
 
-
-        // 第一个开始匹配到的位置
-        let startIndex = -1
-        // 最后一个开始匹配到的位置
-        let endIndex = -1
-        // 已匹配的字符串
-        let hasMatchedString = ''
-        // 匹配结果
-        let matchResultList: Type_Match_Result['matchResultList'] = []
-        // 略过的元素数
-        let skipCount: Type_Match_Result['skipCount'] = 0
-        for (let charIndex = 0; charIndex < inputStr.length; charIndex++) {
-            let matchedIndexInT = templateCharList.indexOf(inputStr[charIndex])
-            if (matchedIndexInT === -1) {
-                continue;
-            }
-            // 成功匹配到
-            startIndex = charIndex
-            // 在模板字符串中移除该元素
-            templateCharList.splice(matchedIndexInT, 1)
-            break;
-        }
-        if (startIndex === -1) {
-            // 没有正确的匹配, 直接返回
-            return {
-                hasMatchedString: '',
-                matchResultList: [],
-                isSuccess: false,
-                startAt: 0,
-                endAt: 0,
-                skipCount: 0,
-            }
-        }
-
-        hasMatchedString = hasMatchedString + inputStr[startIndex]
-        matchResultList.push(1)
-
-        for (let checkIndex = startIndex + 1; checkIndex < inputStr.length; checkIndex++) {
-            let checkedChar = inputStr[checkIndex]
-            let matchedIndexInT = templateCharList.indexOf(checkedChar)
-            hasMatchedString = hasMatchedString + checkedChar
-
-            if (matchedIndexInT === -1) {
-                matchResultList.push(0)
-                skipCount = skipCount + 1
-                continue;
-            }
-            // 成功匹配到, 从待匹配字符串中移除该字符
-            matchResultList.push(1)
-            templateCharList.splice(matchedIndexInT, 1)
-            if (templateCharList.length === 0) {
-                // 所有字母都匹配完毕, 返回匹配到的子串
-                endIndex = checkIndex;
-                matchResult.endAt = checkIndex
-                matchResult.isSuccess = true
-                return {
-                    isSuccess: true,
-                    "startAt": startIndex,
-                    "endAt": checkIndex,
-                    "hasMatchedString": hasMatchedString,
-                    "matchResultList": matchResultList,
-                    "skipCount": skipCount
-                }
-            }
-        }
-        // 仍有templateCharList未能匹配, 返回空字符串
-        return {
-            isSuccess: false,
-            "startAt": startIndex,
-            "endAt": 0,
-            "hasMatchedString": hasMatchedString,
-            "matchResultList": matchResultList,
-            "skipCount": skipCount
-        };
     }
-
-    // 先找到第一组解
-    let miniMatchResult = getMatchedSubStr(s, t)
-    if (miniMatchResult.isSuccess === false) {
-        return ''
+    if (matchContainer.hasMatchSuccess) {
+        return matchContainer.minMatchCharList.join("")
     }
-    if (miniMatchResult.skipCount === 0) {
-        // 不可能更优
-        return miniMatchResult.hasMatchedString
-    }
-
-    let minMatchStr = s
-    for (let currentCheckAt = 0; currentCheckAt < s.length; currentCheckAt++) {
-        let checkStartChar = s[currentCheckAt]
-        // 剪枝逻辑1 - 如果起始字符不在模板字符内, 则不需要匹配
-        if (t.includes(checkStartChar) === false) {
-            continue;
-        }
-        // 剪枝逻辑2 - 如果对应的是当前最短匹配结果中的连续子序列的话, 跳过该段序列的匹配(因为不可能更优)
-        let matchResult = getMatchedSubStr(s.substr(currentCheckAt), t)
-        if (matchResult.isSuccess === false) {
-            continue;
-        }
-        // 连续匹配即从第一位开始, matchResult.matchResultList的连续是1的长度
-        let successionLength = 0
-        while (matchResult.matchResultList[successionLength] === 1) {
-            successionLength++
-        }
-        // 掠过连续为1的情况
-        let prefixCurrentCheckOffset = successionLength - 1
-        currentCheckAt = prefixCurrentCheckOffset + currentCheckAt
-
-
-        if (matchResult.hasMatchedString.length < minMatchStr.length) {
-            minMatchStr = matchResult.hasMatchedString
-        }
-    }
-    return minMatchStr
+    return ''
 };
 
 
@@ -181,6 +111,14 @@ let testCase76 = {
     '测试1': {
         input: "ADDBCOBECODEBANC",
         template: "ABC"
+    },
+    '测试2': {
+        input: "A",
+        template: "A"
+    },
+    '测试3': {
+        input: "A",
+        template: ""
     },
     '官方1': {
         input: "a",
@@ -196,6 +134,6 @@ let testCase76 = {
     }
 }
 
-let testSelect76 = '官方3'
+let testSelect76 = '测试3'
 let result76 = minWindow(testCase76[testSelect76].input, testCase76[testSelect76].template)
 console.log("result76 => ", result76)
