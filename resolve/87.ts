@@ -51,8 +51,6 @@ function isScramble(s1: string, s2: string): boolean {
 
     // 如果一个字符串, 左侧是扰乱字符串, 右侧也是扰乱字符串, 那么整体就是扰乱字符串
     // 扰乱字符串的特点: 字母出现频率必然一致
-    let globalIsScramble = false;
-
     let originString = s1
     let needCheckString = s2
 
@@ -92,20 +90,20 @@ function isScramble(s1: string, s2: string): boolean {
         let leftOriginCheckString_2 = originString.substring(0, originString.length - splitAt - 1)
         let rightOriginCheckString_2 = originString.substring(originString.length - splitAt - 1)
 
-        // 先看是不是一次扰乱字符串
-        let leftCheckResult = isScramble(leftNeedCheckString, rightOriginCheckString_2)
+        // 先看是不是一次扰乱字符串 - 1 左右未扰乱
+        let leftCheckResult = isScramble(leftNeedCheckString, leftOriginCheckString_1)
         let rightCheckResult = false
         if (leftCheckResult === true) {
             // 若左侧不对, 右侧没必要在进行运算
-            rightCheckResult = isScramble(rightNeedCheckString, leftOriginCheckString_2)
+            rightCheckResult = isScramble(rightNeedCheckString, rightOriginCheckString_1)
             if (rightCheckResult === true) {
                 // 只要左右分支均为混淆字符串, 则总体即为混淆字符串
                 return true
             }
         }
 
-        // 然后看, 有没有可能是一次扰乱字符串
-        leftCheckResult = isScramble(leftNeedCheckString, leftOriginCheckString_1)
+        // 先看是不是一次扰乱字符串 - 2 左右扰乱
+        leftCheckResult = isScramble(leftNeedCheckString, rightOriginCheckString_2)
         if (leftCheckResult === true) {
             // 若左侧不对, 右侧没必要在进行运算
             rightCheckResult = isScramble(rightNeedCheckString, leftOriginCheckString_2)
@@ -156,7 +154,7 @@ let testCase87 = {
         target: true,
     }
 }
-let useTestCase87 = '官方2'
+let useTestCase87 = '官方1'
 let testResult87 = testCase87[useTestCase87].target === isScramble(testCase87[useTestCase87].input_1, testCase87[useTestCase87].input_2) ? "测试通过" : "测试失败"
 
 console.log(testResult87)
