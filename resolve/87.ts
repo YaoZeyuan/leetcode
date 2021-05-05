@@ -1,4 +1,6 @@
+let callCount = 0
 function isScramble(s1: string, s2: string): boolean {
+    callCount++
     class TimeCount {
         private timeCount: { [key: string]: number } = {}
         public timeCountHash: string = ''
@@ -92,21 +94,25 @@ function isScramble(s1: string, s2: string): boolean {
 
         // 先看是不是一次扰乱字符串
         let leftCheckResult = isScramble(leftNeedCheckString, rightOriginCheckString_2)
-        let rightCheckResult = isScramble(rightNeedCheckString, leftOriginCheckString_2)
-
-        if (leftCheckResult && rightCheckResult) {
-            // 只要左右分支均为混淆字符串, 则总体即为混淆字符串
-            return true
+        let rightCheckResult = false
+        if (leftCheckResult === true) {
+            // 若左侧不对, 右侧没必要在进行运算
+            rightCheckResult = isScramble(rightNeedCheckString, leftOriginCheckString_2)
+            if (rightCheckResult === true) {
+                // 只要左右分支均为混淆字符串, 则总体即为混淆字符串
+                return true
+            }
         }
 
         // 然后看, 有没有可能是一次扰乱字符串
         leftCheckResult = isScramble(leftNeedCheckString, leftOriginCheckString_1)
-        rightCheckResult = isScramble(rightNeedCheckString, rightOriginCheckString_1)
-
-
-        if (leftCheckResult && rightCheckResult) {
-            // 只要左右分支均为混淆字符串, 则总体即为混淆字符串
-            return true
+        if (leftCheckResult === true) {
+            // 若左侧不对, 右侧没必要在进行运算
+            rightCheckResult = isScramble(rightNeedCheckString, leftOriginCheckString_2)
+            if (rightCheckResult === true) {
+                // 只要左右分支均为混淆字符串, 则总体即为混淆字符串
+                return true
+            }
         }
 
         // let allLeftScreamList = generateAllScreamStringList(leftString)
@@ -136,9 +142,22 @@ let testCase87 = {
         input_1: 'abcdefghihigfabcde',
         input_2: "higfabcdeabcdefghi",
         target: true,
+    },
+    "官方1": {
+        // 超时
+        input_1: 'eebaacbcbcadaaedceaaacadccd',
+        input_2: "eadcaacabaddaceacbceaabeccd",
+        target: false,
+    },
+    "官方2": {
+        // 超时
+        input_1: 'great',
+        input_2: "rgeat",
+        target: true,
     }
 }
-let useTestCase87 = '测试2'
+let useTestCase87 = '官方2'
 let testResult87 = testCase87[useTestCase87].target === isScramble(testCase87[useTestCase87].input_1, testCase87[useTestCase87].input_2) ? "测试通过" : "测试失败"
 
 console.log(testResult87)
+console.log("callCount => ", callCount)
