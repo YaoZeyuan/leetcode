@@ -1,5 +1,5 @@
 function isScramble(s1: string, s2: string): boolean {
-    class ScreamString {
+    class TimeCount {
         private timeCount: { [key: string]: number } = {}
         public timeCountHash: string = ''
 
@@ -19,7 +19,7 @@ function isScramble(s1: string, s2: string): boolean {
             }
         }
 
-        hasSameTimeCount(other: ScreamString) {
+        hasSameTimeCount(other: TimeCount) {
             return other.timeCountHash === this.timeCountHash
         }
 
@@ -67,6 +67,12 @@ function isScramble(s1: string, s2: string): boolean {
     }
     if (originString.length === 2) {
         return (originString === needCheckString) || (originString.split("").reverse().join("") === needCheckString)
+    }
+    let originTimeCount = new TimeCount(originString)
+    let needCheckTimeCount = new TimeCount(needCheckString)
+    // 若hash不对, 也不需要继续向下比较
+    if (originTimeCount.timeCountHash !== needCheckTimeCount.timeCountHash) {
+        return false
     }
 
     // 检测本身是否为扰乱字符串
@@ -127,8 +133,8 @@ let testCase87 = {
         target: true,
     },
     "测试2": {
-        input_1: 'baa',
-        input_2: "aab",
+        input_1: 'abcdefghihigfabcde',
+        input_2: "higfabcdeabcdefghi",
         target: true,
     }
 }
