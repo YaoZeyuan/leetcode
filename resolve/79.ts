@@ -1,7 +1,8 @@
+// 改成使用深度优先方法实现----广度优先会爆内存, 无法使用
 type TypePosition = { x: number, y: number }
 type TypeSolution = {
     // 匹配文字序列
-    charList: string[]
+    matchedCharList: string[]
     // 匹配坐标序列
     positionList: TypePosition[],
     // 已有位置列表
@@ -9,32 +10,22 @@ type TypeSolution = {
 }
 
 let slove
-let pathHasCheckSet: Set<string>
-
+// 状态堆栈
 {
-    let total_第n轮匹配 = 0
-
-    // 记录检查过的路径
-    pathHasCheckSet = new Set()
-
     /**
      * @param board 
      * @param word 
      * @param waitToCheckSolutionList 待检查的位置列表 
      * @param wordCheckPosition 待检查的字符位置, 从0开始. 若到最后一个仍符合要求, 那么返回true
      */
-    slove = (board: string[][], word: string, waitToCheckSolutionList: TypeSolution[], wordCheckPosition: number) => {
+    slove = (board: string[][], word: string, needCheckSolution: TypeSolution = {
+        "matchedCharList": [],
+        "positionList": [],
+        "positionSet": new Set()
+    }, wordCheckPosition: number = 0) => {
         if (word.length === 0) {
             // 长度为0必然正确
             return true;
-        }
-        if (word.length <= wordCheckPosition) {
-            // 所有待检验位置均已匹配完毕
-            if (waitToCheckSolutionList.length > 0) {
-                return true;
-            } else {
-                return false;
-            }
         }
 
         // 第一步, 找到所有符合要求的第一个格子
@@ -85,124 +76,120 @@ let pathHasCheckSet: Set<string>
             }
         }
 
-
-        // 待检查的char
         let needToMatchChar = word[wordCheckPosition]
 
-        if (wordCheckPosition === 0) {
+        if (needCheckSolution?.matchedCharList?.join("") === 'ABCCE') {
+            console.log("123")
+        }
+
+        if (needCheckSolution.positionList.length === 0) {
             // 首次匹配
             for (let x = 0; x < width; x++) {
                 for (let y = 0; y < height; y++) {
-                    let char = Tools.getPosition(x, y)
-                    if (char === needToMatchChar) {
-                        let newPosition = {
-                            charList: [char],
-                            "positionList": [
-                                { x, y }
-                            ],
-                            positionSet: new Set([Tools.getPositionKey(x, y)])
-                        }
-                        waitToCheckSolutionList.push(
-                            newPosition
-                        )
-                        let key = Tools.positionList2Key(newPosition.positionList)
-                        pathHasCheckSet.add(key)
+                    // 从第0个节点开始遍历
+                    // 待匹配的值
+                    let nextCheckSolution: TypeSolution = {
+                        matchedCharList: [],
+                        positionList: [
+                            {
+                                x,
+                                y
+                            },
+                        ],
+                        positionSet: new Set()
+                    }
+
+                    let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition);
+                    if (nextFloorCheckResult === true) {
+                        return true
                     }
                 }
             }
 
-            console.log(`第${total_第n轮匹配++}轮匹配, 待匹配项目数${waitToCheckSolutionList.length}个`)
-            return slove(board, word, [...waitToCheckSolutionList], wordCheckPosition + 1)
+            // 没有匹配到可行解
+            return false
         } else {
-            // 后续匹配
+            // 继续匹配, 先检查当前位置是否匹配上了
+            let needCheckPosition = needCheckSolution.positionList[needCheckSolution.positionList.length - 1]
+            let { x, y } = needCheckPosition
+            // 没匹配上返回false
+            if (Tools.isPositionLegal(x, y) === false) {
+                return false
+            }
+            let posChar = Tools.getPosition(x, y)
+            if (posChar !== needToMatchChar) {
+                return false
+            }
+            // 路径已被使用返回false
+            if (needCheckSolution.positionSet.has(Tools.getPositionKey(x, y))) {
+                return false
+            }
+            // 校验通过, 可以添加到已匹配列表中
+            needCheckSolution.matchedCharList.push(needToMatchChar)
 
-            let nextLegalPositionList: TypeSolution[] = []
-            // 针对已有的记录进行检查, 后续对首元素而言, 必然是剪枝操作, 不会新增
-            for (let existLegalPosition of waitToCheckSolutionList) {
-                // 拿到当前定位
-                let currentPosition = existLegalPosition.positionList[existLegalPosition.positionList.length - 1]
-                let current_Position_X = currentPosition.x
-                let current_Position_Y = currentPosition.y
+            if (word.length <= needCheckSolution.matchedCharList.length) {
+                if (word === needCheckSolution.matchedCharList.join("")) {
+                    console.log("find it!")
+                    // console.log(JSON.stringify(needCheckSolution, null, 2))
+                    return true
+                }
+                return false
+            }
 
-                // 判断上下左右是否有符合要求的位置
-                let needCheckPositionList: TypePosition[] = [
-                    {
-                        x: current_Position_X + 1,
-                        y: current_Position_Y,
-                    },
-                    {
-                        x: current_Position_X - 1,
-                        y: current_Position_Y,
-                    },
-                    {
-                        x: current_Position_X,
-                        y: current_Position_Y + 1,
-                    },
-                    {
-                        x: current_Position_X,
-                        y: current_Position_Y - 1,
-                    },
-                ]
-                // 依次对位置进行检测
-                for (let needCheckPosition of needCheckPositionList) {
-                    let { x, y } = needCheckPosition
-                    // console.debug({ x, y }, "=>", Tools.getPosition(x, y))
-                    // 位置不合法不要
-                    if (Tools.isPositionLegal(x, y) === false) {
-                        continue;
-                    }
-                    // 匹配不上不要
-                    if (Tools.getPosition(x, y) !== needToMatchChar) {
-                        continue;
-                    }
-                    // 曾经出现过不要
-                    let positionKey = Tools.getPositionKey(x, y)
-                    if (existLegalPosition.positionSet.has(positionKey)) {
-                        continue
-                    }
-                    // 都符合条件, 则该位置可以继续探索
+            // 都符合条件, 则该位置可以继续探索
+            let current_Position_X = x
+            let current_Position_Y = y
+            // 下一个位置
 
-                    let newPosition = {
-                        charList: [...existLegalPosition.charList, needToMatchChar],
-                        "positionList": [...existLegalPosition.positionList, { x, y }],
-                        "positionSet": new Set([...existLegalPosition.positionSet.values(), Tools.getPositionKey(x, y)])
-                    }
-                    let key = Tools.positionList2Key(newPosition.positionList)
-                    if (pathHasCheckSet.has(key) === false) {
-                        nextLegalPositionList.push(newPosition)
-                        pathHasCheckSet.add(key)
-                    } else {
-                        // 剪枝
-                        continue;
-                    }
+            // 判断上下左右是否有符合要求的位置
+            let needCheckPositionList: TypePosition[] = [
+                {
+                    x: current_Position_X + 1,
+                    y: current_Position_Y,
+                },
+                {
+                    x: current_Position_X - 1,
+                    y: current_Position_Y,
+                },
+                {
+                    x: current_Position_X,
+                    y: current_Position_Y + 1,
+                },
+                {
+                    x: current_Position_X,
+                    y: current_Position_Y - 1,
+                },
+            ]
+            // 依次对位置进行检测
+            for (let needCheckPosition of needCheckPositionList) {
+                // 拼接解
+                let nextCheckSolution: TypeSolution = {
+                    matchedCharList: [...needCheckSolution.matchedCharList],
+                    positionList: [...needCheckSolution.positionList, {
+                        x: needCheckPosition.x,
+                        y: needCheckPosition.y
+                    }],
+                    positionSet: new Set([...needCheckSolution.positionSet.values(), Tools.getPositionKey(current_Position_X, current_Position_Y)])
                 }
 
+                let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition + 1);
+                if (nextFloorCheckResult === true) {
+                    return true
+                }
+            }
 
-            }
-            console.log(`第${total_第n轮匹配++}轮匹配, 待匹配项目数${waitToCheckSolutionList.length}个`)
-            if (nextLegalPositionList.length === 0) {
-                return false
-            } else {
-                // 对nextLegalPositionList进行去重
-                console.log(`本轮共有${nextLegalPositionList.length}条结果`)
-                return slove(board, word, nextLegalPositionList, wordCheckPosition + 1)
-            }
+            return false
         }
 
-        // 深度优先策略
-
-        // 第二步, 针对每一个符合要求的格子, 检查其上下左右是否仍符合要求
-        // 若符合要求, 则继续向下递归查找
-        // 若不符合要求, 则跳过
-
-
     }
+
 }
-
-
 function exist(board: string[][], word: string): boolean {
-    let result = slove(board, word, [], 0)
-    pathHasCheckSet = new Set()
+    let result = slove(board, word, {
+        matchedCharList: [],
+        positionList: [],
+        positionSet: new Set()
+    }, 0)
     return result
 };
 
@@ -230,14 +217,27 @@ let a = exist(
     // ],
     // "AAB"
 
-    [
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"]
-    ],
-    "AAAAAAAAAAAAAAB"
+    // case4
+    // [
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"]
+    // ],
+    // "AAAAAAAAAAAAAAB"
+
+    // case5
+    [["a", "a"]],
+    "aaa"
+
+    // case6
+    // [
+    //     ["A", "B", "C", "E"],
+    //     ["S", "F", "C", "S"],
+    //     ["A", "D", "E", "E"]
+    // ],
+    // "ABCCED"
 )
 console.log("result => ", a)
