@@ -9,7 +9,10 @@ type TypeSolution = {
     positionSet: Set<string>
 }
 
+let computeCount = 0
 let slove
+
+let hasTestPathSet: Set<string> = new Set()
 // 状态堆栈
 {
     /**
@@ -23,6 +26,12 @@ let slove
         "positionList": [],
         "positionSet": new Set()
     }, wordCheckPosition: number = 0) => {
+
+        computeCount++
+        if (computeCount % 1000 == 0) {
+            console.log(`累计运算${computeCount}次`)
+        }
+
         if (word.length === 0) {
             // 长度为0必然正确
             return true;
@@ -78,10 +87,6 @@ let slove
 
         let needToMatchChar = word[wordCheckPosition]
 
-        if (needCheckSolution?.matchedCharList?.join("") === 'ABCCE') {
-            console.log("123")
-        }
-
         if (needCheckSolution.positionList.length === 0) {
             // 首次匹配
             for (let x = 0; x < width; x++) {
@@ -130,7 +135,6 @@ let slove
             if (word.length <= needCheckSolution.matchedCharList.length) {
                 if (word === needCheckSolution.matchedCharList.join("")) {
                     console.log("find it!")
-                    // console.log(JSON.stringify(needCheckSolution, null, 2))
                     return true
                 }
                 return false
@@ -172,6 +176,13 @@ let slove
                     positionSet: new Set([...needCheckSolution.positionSet.values(), Tools.getPositionKey(current_Position_X, current_Position_Y)])
                 }
 
+                let key = Tools.positionList2Key(nextCheckSolution.positionList)
+                if (hasTestPathSet.has(key)) {
+                    continue
+                } else {
+                    console.log("hasTestPathSet => ", hasTestPathSet.size)
+                    hasTestPathSet.add(key)
+                }
                 let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition + 1);
                 if (nextFloorCheckResult === true) {
                     return true
@@ -185,6 +196,7 @@ let slove
 
 }
 function exist(board: string[][], word: string): boolean {
+    hasTestPathSet = new Set()
     let result = slove(board, word, {
         matchedCharList: [],
         positionList: [],
@@ -218,19 +230,19 @@ let a = exist(
     // "AAB"
 
     // case4
-    // [
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"]
-    // ],
-    // "AAAAAAAAAAAAAAB"
+    [
+        ["A", "A", "A", "A", "A", "A"],
+        ["A", "A", "A", "A", "A", "A"],
+        ["A", "A", "A", "A", "A", "A"],
+        ["A", "A", "A", "A", "A", "A"],
+        ["A", "A", "A", "A", "A", "A"],
+        ["A", "A", "A", "A", "A", "A"]
+    ],
+    "AAAAAAAAAAAAAAB"
 
     // case5
-    [["a", "a"]],
-    "aaa"
+    // [["a", "a"]],
+    // "aaa"
 
     // case6
     // [
