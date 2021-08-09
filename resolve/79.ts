@@ -12,7 +12,11 @@ type TypeSolution = {
 let computeCount = 0
 let slove
 
+const Const_Path_Split = '_===_'
+
 let hasTestPathSet: Set<string> = new Set()
+// 从位于pos上的点出发, 不可以达到的点的集合
+let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
 // 状态堆栈
 {
     /**
@@ -107,7 +111,18 @@ let hasTestPathSet: Set<string> = new Set()
                     let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition);
                     if (nextFloorCheckResult === true) {
                         return true
+                    } else {
+                        // 根据历史路径, 该点出发, 不能抵达目标, 记录到map里
+                        let posParentPathKey = Tools.positionList2Key([...nextCheckSolution.positionList].slice(0, nextCheckSolution.positionList.length - 1))
+                        let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
+                        if (posCannotReachTargetMap.has(posKey)) {
+                            let oldSet = posCannotReachTargetMap.get(posKey)
+                            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), word]))
+                        } else {
+                            posCannotReachTargetMap.set(posKey, new Set([word]))
+                        }
                     }
+
                 }
             }
 
@@ -164,6 +179,16 @@ let hasTestPathSet: Set<string> = new Set()
                     y: current_Position_Y - 1,
                 },
             ]
+
+            // 根据历史路径, 该点出发, 不能抵达目标, 记录到map里
+            let posParentPathKey = Tools.positionList2Key([...needCheckSolution.positionList])
+            let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
+            if (posKey === '{"x":3,"y":1}') {
+                console.log("123")
+            }
+            // 下一轮需要探测的目标
+            let nextNeedMatchStr = word.slice(wordCheckPosition + 1)
+
             // 依次对位置进行检测
             for (let needCheckPosition of needCheckPositionList) {
                 // 拼接解
@@ -176,19 +201,30 @@ let hasTestPathSet: Set<string> = new Set()
                     positionSet: new Set([...needCheckSolution.positionSet.values(), Tools.getPositionKey(current_Position_X, current_Position_Y)])
                 }
 
-                let key = Tools.positionList2Key(nextCheckSolution.positionList)
-                if (hasTestPathSet.has(key)) {
-                    continue
+
+
+                // 看看是否曾经探测过
+                if (posCannotReachTargetMap.has(posKey)) {
+                    let oldSet = posCannotReachTargetMap.get(posKey)
+                    if (oldSet.has(nextNeedMatchStr)) {
+                        // 说明前人探过路了, 且探路失败, 直接略过即可
+                        continue
+                    }
                 } else {
-                    console.log("hasTestPathSet => ", hasTestPathSet.size)
-                    hasTestPathSet.add(key)
+                    // 否则创建一个空记录
+                    posCannotReachTargetMap.set(posKey, new Set([]))
                 }
+
                 let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition + 1);
                 if (nextFloorCheckResult === true) {
                     return true
                 }
             }
 
+            // 所有可能解都测试过, 确实搞不定
+            let oldSet = posCannotReachTargetMap.get(posKey)
+            // 留个路标, 造福后人
+            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), nextNeedMatchStr]))
             return false
         }
 
@@ -197,6 +233,7 @@ let hasTestPathSet: Set<string> = new Set()
 }
 function exist(board: string[][], word: string): boolean {
     hasTestPathSet = new Set()
+    posCannotReachTargetMap = new Map()
     let result = slove(board, word, {
         matchedCharList: [],
         positionList: [],
@@ -230,15 +267,15 @@ let a = exist(
     // "AAB"
 
     // case4
-    [
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"],
-        ["A", "A", "A", "A", "A", "A"]
-    ],
-    "AAAAAAAAAAAAAAB"
+    // [
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"],
+    //     ["A", "A", "A", "A", "A", "A"]
+    // ],
+    // "AAAAAAAAAAAAAB"
 
     // case5
     // [["a", "a"]],
@@ -251,5 +288,13 @@ let a = exist(
     //     ["A", "D", "E", "E"]
     // ],
     // "ABCCED"
+
+    // case7
+    [
+        ["A", "B", "C", "E"],
+        ["S", "F", "E", "S"],
+        ["A", "D", "E", "E"]
+    ],
+    "ABCESEEEFS"
 )
 console.log("result => ", a)
