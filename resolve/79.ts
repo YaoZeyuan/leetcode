@@ -181,8 +181,9 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
             ]
 
             // 根据历史路径, 该点出发, 不能抵达目标, 记录到map里
-            let posParentPathKey = Tools.positionList2Key([...needCheckSolution.positionList])
-            let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
+            let posParentPathKey = Tools.positionList2Key([...needCheckSolution.positionList].slice(0, needCheckSolution.positionList.length - 1))
+            // let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
+            let posKey = Tools.getPositionKey(x, y)
             if (posKey === '{"x":3,"y":1}') {
                 console.log("123")
             }
