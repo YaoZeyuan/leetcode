@@ -312,6 +312,8 @@ let testCaseList = [
     // },
 ]
 
+testCaseList = [testCaseList[0]]
+
 let counter = -1
 for (let testCase of testCaseList) {
     counter++
