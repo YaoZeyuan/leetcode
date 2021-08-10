@@ -10,12 +10,12 @@ type TypeSolution = {
 }
 
 let computeCount = 0
-let slove
+let exist
 
 const Const_Path_Split = '_===_'
 
 let hasTestPathSet: Set<string> = new Set()
-// 从位于pos上的点出发, 不可以达到的点的集合
+// 从位于pos上的点出发, 不可以达到的点的集合. 只记录完全不可能抵达的点, 如果只是由于路径不满足, 则不记录
 let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
 // 状态堆栈
 {
@@ -24,20 +24,26 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
      * @param word 
      * @param waitToCheckSolutionList 待检查的位置列表 
      * @param wordCheckPosition 待检查的字符位置, 从0开始. 若到最后一个仍符合要求, 那么返回true
+     * @param isCheckHistoryPos 是否检查历史位置
      */
-    slove = (board: string[][], word: string, needCheckSolution: TypeSolution = {
+    let slove = (board: string[][], currentSolution: TypeSolution = {
         "matchedCharList": [],
         "positionList": [],
         "positionSet": new Set()
-    }, wordCheckPosition: number = 0) => {
+    }, needMatchPos: TypePosition, remainCharList: string[] = [], isCheckHistoryPos = true) => {
+
+        // 解除引用关系
+        remainCharList = [...remainCharList]
 
         computeCount++
         if (computeCount % 1000 == 0) {
-            console.log(`累计运算${computeCount}次`)
+            // console.log(`累计运算${computeCount}次`)
         }
+        let currentNeedMatchChar = remainCharList[0]
+        remainCharList = remainCharList.slice(1)
 
-        if (word.length === 0) {
-            // 长度为0必然正确
+        if (currentNeedMatchChar === '' || currentNeedMatchChar === undefined) {
+            // 没有剩余需要匹配的值了, 必然正确
             return true;
         }
 
@@ -89,213 +95,231 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
             }
         }
 
-        let needToMatchChar = word[wordCheckPosition]
+        let { x, y } = needMatchPos
 
-        if (needCheckSolution.positionList.length === 0) {
-            // 首次匹配
-            for (let x = 0; x < width; x++) {
-                for (let y = 0; y < height; y++) {
-                    // 从第0个节点开始遍历
-                    // 待匹配的值
-                    let nextCheckSolution: TypeSolution = {
-                        matchedCharList: [],
-                        positionList: [
-                            {
-                                x,
-                                y
-                            },
-                        ],
-                        positionSet: new Set()
-                    }
-
-                    let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition);
-                    if (nextFloorCheckResult === true) {
-                        return true
-                    } else {
-                        // 根据历史路径, 该点出发, 不能抵达目标, 记录到map里
-                        let posParentPathKey = Tools.positionList2Key([...nextCheckSolution.positionList].slice(0, nextCheckSolution.positionList.length - 1))
-                        let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
-                        if (posCannotReachTargetMap.has(posKey)) {
-                            let oldSet = posCannotReachTargetMap.get(posKey)
-                            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), word]))
-                        } else {
-                            posCannotReachTargetMap.set(posKey, new Set([word]))
-                        }
-                    }
-
-                }
-            }
-
-            // 没有匹配到可行解
-            return false
-        } else {
-            // 继续匹配, 先检查当前位置是否匹配上了
-            let needCheckPosition = needCheckSolution.positionList[needCheckSolution.positionList.length - 1]
-            let { x, y } = needCheckPosition
-            // 没匹配上返回false
-            if (Tools.isPositionLegal(x, y) === false) {
-                return false
-            }
-            let posChar = Tools.getPosition(x, y)
-            if (posChar !== needToMatchChar) {
-                return false
-            }
-            // 路径已被使用返回false
-            if (needCheckSolution.positionSet.has(Tools.getPositionKey(x, y))) {
-                return false
-            }
-            // 校验通过, 可以添加到已匹配列表中
-            needCheckSolution.matchedCharList.push(needToMatchChar)
-
-            if (word.length <= needCheckSolution.matchedCharList.length) {
-                if (word === needCheckSolution.matchedCharList.join("")) {
-                    console.log("find it!")
-                    return true
-                }
-                return false
-            }
-
-            // 都符合条件, 则该位置可以继续探索
-            let current_Position_X = x
-            let current_Position_Y = y
-            // 下一个位置
-
-            // 判断上下左右是否有符合要求的位置
-            let needCheckPositionList: TypePosition[] = [
-                {
-                    x: current_Position_X + 1,
-                    y: current_Position_Y,
-                },
-                {
-                    x: current_Position_X - 1,
-                    y: current_Position_Y,
-                },
-                {
-                    x: current_Position_X,
-                    y: current_Position_Y + 1,
-                },
-                {
-                    x: current_Position_X,
-                    y: current_Position_Y - 1,
-                },
-            ]
-
-            // 根据历史路径, 该点出发, 不能抵达目标, 记录到map里
-            let posParentPathKey = Tools.positionList2Key([...needCheckSolution.positionList].slice(0, needCheckSolution.positionList.length - 1))
-            // let posKey = posParentPathKey + Const_Path_Split + Tools.getPositionKey(x, y)
-            let posKey = Tools.getPositionKey(x, y)
-            if (posKey === '{"x":3,"y":1}') {
-                console.log("123")
-            }
-            // 下一轮需要探测的目标
-            let nextNeedMatchStr = word.slice(wordCheckPosition + 1)
-
-            // 依次对位置进行检测
-            for (let needCheckPosition of needCheckPositionList) {
-                // 拼接解
-                let nextCheckSolution: TypeSolution = {
-                    matchedCharList: [...needCheckSolution.matchedCharList],
-                    positionList: [...needCheckSolution.positionList, {
-                        x: needCheckPosition.x,
-                        y: needCheckPosition.y
-                    }],
-                    positionSet: new Set([...needCheckSolution.positionSet.values(), Tools.getPositionKey(current_Position_X, current_Position_Y)])
-                }
-
-
-
-                // 看看是否曾经探测过
-                if (posCannotReachTargetMap.has(posKey)) {
-                    let oldSet = posCannotReachTargetMap.get(posKey)
-                    if (oldSet.has(nextNeedMatchStr)) {
-                        // 说明前人探过路了, 且探路失败, 直接略过即可
-                        continue
-                    }
-                } else {
-                    // 否则创建一个空记录
-                    posCannotReachTargetMap.set(posKey, new Set([]))
-                }
-
-                let nextFloorCheckResult = slove(board, word, nextCheckSolution, wordCheckPosition + 1);
-                if (nextFloorCheckResult === true) {
-                    return true
-                }
-            }
-
-            // 所有可能解都测试过, 确实搞不定
-            let oldSet = posCannotReachTargetMap.get(posKey)
-            // 留个路标, 造福后人
-            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), nextNeedMatchStr]))
+        // 位置是否合法
+        if (Tools.isPositionLegal(x, y) === false) {
             return false
         }
+        // 值是否匹配
+        let pos_char = Tools.getPosition(x, y)
+        if (pos_char !== currentNeedMatchChar) {
+            return false
+        }
+        // 路径是否已被使用
+        if (isCheckHistoryPos === true) {
+            if (currentSolution.positionSet.has(Tools.getPositionKey(x, y))) {
+                return false
+            }
+        }
+        // 校验通过
+        if (remainCharList.length === 0 && isCheckHistoryPos === true) {
+            // 所有记录已匹配完毕, 直接返回
+            // console.log("find it!")
+            return true
+        }
+
+
+        // 都符合条件, 则该位置可以继续探索
+        let current_Position_X = x
+        let current_Position_Y = y
+        // 下一个位置
+
+        // 判断上下左右是否有符合要求的位置
+        let needCheckPositionList: TypePosition[] = [
+            {
+                x: current_Position_X + 1,
+                y: current_Position_Y,
+            },
+            {
+                x: current_Position_X - 1,
+                y: current_Position_Y,
+            },
+            {
+                x: current_Position_X,
+                y: current_Position_Y + 1,
+            },
+            {
+                x: current_Position_X,
+                y: current_Position_Y - 1,
+            },
+        ]
+
+        // 根据历史路径, 若从该点出发, 绝对不能抵达目标, 则记录到map里
+        let posKey = Tools.getPositionKey(x, y)
+        if (posKey === '{"x":3,"y":2}') {
+            // console.log("123")
+        }
+        // 生成下一轮需要探测的目标
+
+        // 当前状况
+        let nextCheckSolution: TypeSolution = {
+            matchedCharList: [...currentSolution.matchedCharList, currentNeedMatchChar],
+            positionList: [...currentSolution.positionList, {
+                x,
+                y
+            }],
+            positionSet: new Set([...currentSolution.positionSet.values(), Tools.getPositionKey(x, y)])
+        }
+
+
+        // 再向下需要匹配的点
+        let nextNeedMatchStr = remainCharList.join("")
+        // 默认从该位置出发绝对不可满足目标
+        let isAbsoluteCannotReach = true
+        // 依次对位置进行检测
+        for (let needCheckPosition of needCheckPositionList) {
+            let nextPosKey = Tools.getPositionKey(needCheckPosition.x, needCheckPosition.y)
+            // 看看是否曾经探测过
+            if (posCannotReachTargetMap.has(nextPosKey)) {
+                let oldSet = posCannotReachTargetMap.get(nextPosKey)
+                if (oldSet.has(nextNeedMatchStr)) {
+                    // 说明前人探过路了, 且探路失败, 直接略过即可
+                    continue
+                }
+            } else {
+                // 否则创建一个空记录
+                posCannotReachTargetMap.set(nextPosKey, new Set([]))
+            }
+            // 预检查
+            let firstCheckResult = slove(board, nextCheckSolution, needCheckPosition, remainCharList, false);
+            if (firstCheckResult === false) {
+                // 预检查不通过, 没必要再查后续的了
+                continue
+            } else {
+                isAbsoluteCannotReach = false
+            }
+
+            let nextFloorCheckResult = slove(board, nextCheckSolution, needCheckPosition, remainCharList, true);
+            if (nextFloorCheckResult === true) {
+                return true
+            }
+        }
+
+        if (isAbsoluteCannotReach === true) {
+            // 四个方向都验证过, 绝对不可抵达, 记到map里
+            // 所有可能解都测试过, 确实搞不定
+            let oldSet: Set<string> = new Set()
+            if (posCannotReachTargetMap.has(posKey)) {
+                oldSet = posCannotReachTargetMap.get(posKey)
+            }
+            // 留个路标, 造福后人
+            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), nextNeedMatchStr]))
+        }
+        return false
 
     }
 
+    exist = (board: string[][], word: string) => {
+        if (word.length === 0) {
+            return true
+        }
+
+        hasTestPathSet = new Set()
+        posCannotReachTargetMap = new Map()
+
+        let width = board[0].length
+        let height = board.length
+
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                let match_result = slove(board, {
+                    matchedCharList: [],
+                    positionList: [],
+                    positionSet: new Set()
+                },
+                    {
+                        x,
+                        y
+                    },
+                    word.split(""),
+                    true
+                )
+                if (match_result) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    };
 }
-function exist(board: string[][], word: string): boolean {
-    hasTestPathSet = new Set()
-    posCannotReachTargetMap = new Map()
-    let result = slove(board, word, {
-        matchedCharList: [],
-        positionList: [],
-        positionSet: new Set()
-    }, 0)
-    return result
-};
 
-let a = exist(
-    // case 1
-    // [
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"]
-    // ],
-    // "AAAAAAAAAAAAAA"
+let testCaseList = [
+    {
+        input1: [
+            ["C", "A", "A"],
+            ["A", "A", "A"],
+            ["B", "C", "D"]
+        ],
+        input2: "AAB",
+        output: true
+    },
+    {
+        input1: [
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"]
+        ],
+        input2: "AAAAAAAAAAAAAA"
+        ,
+        output: true
+    },
+    {
+        input1: [
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"],
+            ["A", "A", "A", "A", "A", "A"]
+        ],
+        input2: "AAAAAAAAAAAAAB",
+        output: false
+    },
+    {
+        input1: [["a", "a"]],
+        input2: "aaa",
+        output: false
+    },
 
-    // case 2
-    // [["a", "a"]],
-    // "aa"
+    {
+        input1: [
+            ["A", "B", "C", "E"],
+            ["S", "F", "C", "S"],
+            ["A", "D", "E", "E"]
+        ],
 
-    // case 3
-    // [
-    //     ["C", "A", "A"],
-    //     ["A", "A", "A"],
-    //     ["B", "C", "D"]
-    // ],
-    // "AAB"
+        input2: "ABCCED",
+        output: true
+    },
+    {
+        input1: [
+            ["A", "B", "C", "E"],
+            ["S", "F", "E", "S"],
+            ["A", "D", "E", "E"]
+        ],
+        input2: "ABCESEEEFS",
+        output: true
+    },
+    // {
+    //     input1: ,
+    //     input2: ,
+    //     output: 
+    // },
+]
 
-    // case4
-    // [
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"],
-    //     ["A", "A", "A", "A", "A", "A"]
-    // ],
-    // "AAAAAAAAAAAAAB"
-
-    // case5
-    // [["a", "a"]],
-    // "aaa"
-
-    // case6
-    // [
-    //     ["A", "B", "C", "E"],
-    //     ["S", "F", "C", "S"],
-    //     ["A", "D", "E", "E"]
-    // ],
-    // "ABCCED"
-
-    // case7
-    [
-        ["A", "B", "C", "E"],
-        ["S", "F", "E", "S"],
-        ["A", "D", "E", "E"]
-    ],
-    "ABCESEEEFS"
-)
-console.log("result => ", a)
+let counter = -1
+for (let testCase of testCaseList) {
+    counter++
+    console.info(`🕛开始第${counter}项测试`)
+    let result = exist(testCase.input1, testCase.input2)
+    if (result !== testCase.output) {
+        console.warn(`🤦‍♂️第${counter}项测试失败, input1:${testCase.input1},input1:${testCase.input2},output:${testCase.output}, 实际回答:${result}`)
+    } else {
+        console.info(`🎉第${counter}项测试成功`)
+    }
+}
