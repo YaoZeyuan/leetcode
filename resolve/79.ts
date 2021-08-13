@@ -12,9 +12,6 @@ type TypeSolution = {
 let computeCount = 0
 let exist
 
-const Const_Path_Split = '_===_'
-
-let hasTestPathSet: Set<string> = new Set()
 // 从位于pos上的点出发, 不可以达到的点的集合. 只记录完全不可能抵达的点, 如果只是由于路径不满足, 则不记录
 let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
 // 状态堆栈
@@ -147,7 +144,7 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
 
         // 根据历史路径, 若从该点出发, 绝对不能抵达目标, 则记录到map里
         let posKey = Tools.getPositionKey(x, y)
-        if (posKey === '{"x":3,"y":2}') {
+        if (posKey === '{"x":0,"y":1}') {
             // console.log("123")
         }
         // 生成下一轮需要探测的目标
@@ -177,9 +174,6 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
                     // 说明前人探过路了, 且探路失败, 直接略过即可
                     continue
                 }
-            } else {
-                // 否则创建一个空记录
-                posCannotReachTargetMap.set(nextPosKey, new Set([]))
             }
             // 预检查
             let firstCheckResult = slove(board, nextCheckSolution, needCheckPosition, remainCharList, false);
@@ -190,13 +184,13 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
                 isAbsoluteCannotReach = false
             }
 
-            let nextFloorCheckResult = slove(board, nextCheckSolution, needCheckPosition, remainCharList, true);
+            let nextFloorCheckResult = slove(board, nextCheckSolution, needCheckPosition, remainCharList, isCheckHistoryPos);
             if (nextFloorCheckResult === true) {
                 return true
             }
         }
 
-        if (isAbsoluteCannotReach === true) {
+        if (isAbsoluteCannotReach === true && isCheckHistoryPos === false) {
             // 四个方向都验证过, 绝对不可抵达, 记到map里
             // 所有可能解都测试过, 确实搞不定
             let oldSet: Set<string> = new Set()
@@ -204,7 +198,7 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
                 oldSet = posCannotReachTargetMap.get(posKey)
             }
             // 留个路标, 造福后人
-            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), nextNeedMatchStr]))
+            posCannotReachTargetMap.set(posKey, new Set([...oldSet.values(), currentNeedMatchChar + nextNeedMatchStr]))
         }
         return false
 
@@ -215,8 +209,8 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
             return true
         }
 
-        hasTestPathSet = new Set()
         posCannotReachTargetMap = new Map()
+        computeCount = 0
 
         let width = board[0].length
         let height = board.length
@@ -246,6 +240,22 @@ let posCannotReachTargetMap: Map<string, Set<string>> = new Map()
 }
 
 let testCaseList = [
+    {
+        input1: [
+            ["A", "B", "E"],
+            ["B", "C", "D"]
+        ],
+        input2: "ABCDEB",
+        output: true
+    },
+    {
+        input1: [
+            ["A", "B", "E"],
+            ["B", "C", "D"]
+        ],
+        input2: "DEBCBA",
+        output: true
+    },
     {
         input1: [
             ["C", "A", "A"],
@@ -312,7 +322,7 @@ let testCaseList = [
     // },
 ]
 
-testCaseList = [testCaseList[0]]
+// testCaseList = [testCaseList[0]]
 
 let counter = -1
 for (let testCase of testCaseList) {
@@ -322,6 +332,6 @@ for (let testCase of testCaseList) {
     if (result !== testCase.output) {
         console.warn(`🤦‍♂️第${counter}项测试失败, input1:${testCase.input1},input1:${testCase.input2},output:${testCase.output}, 实际回答:${result}`)
     } else {
-        console.info(`🎉第${counter}项测试成功`)
+        console.info(`🎉第${counter}项测试成功, 共运算${computeCount}次`)
     }
 }
