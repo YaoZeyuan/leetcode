@@ -1,4 +1,8 @@
 function minDistance(word1: string, word2: string): number {
+    if (word1.length === 0 || word2.length === 0) {
+        return Math.max(word1.length, word2.length)
+    }
+
     const Tools = {
         /**
              * 获取指定位置上的记录
@@ -36,40 +40,52 @@ function minDistance(word1: string, word2: string): number {
             if (x === 0) {
                 let xChar = word1[x]
                 let yChar = word2[y]
-                if (xChar === yChar) {
-                    cacheRect[y][x] = cacheRect?.[y - 1]?.[x] || 0
+
+                let y_has_use = (cacheRect?.[y - 1]?.[x] || 0) === y - 1
+                let last_y_value = cacheRect?.[y - 1]?.[x] || 0
+
+                // 需要判断之前该值是否被用过. 若字母已被匹配过, 则仍然要+1
+                if (xChar === yChar && y_has_use === false) {
+                    cacheRect[y][x] = last_y_value
                 } else {
-                    cacheRect[y][x] = (cacheRect?.[y - 1]?.[x] || 0) + 1
+                    cacheRect[y][x] = last_y_value + 1
                 }
             }
             if (y === 0) {
                 let xChar = word1[x]
                 let yChar = word2[y]
-                if (xChar === yChar) {
-                    cacheRect[y][x] = cacheRect?.[y]?.[x - 1] || 0
+                let x_has_use = (cacheRect?.[y]?.[x - 1] || 0) === x - 1
+
+                let last_x_value = cacheRect?.[y]?.[x - 1] || 0
+                if (xChar === yChar && x_has_use === false) {
+                    cacheRect[y][x] = last_x_value
                 } else {
-                    cacheRect[y][x] = (cacheRect?.[y]?.[x - 1] || 0) + 1
+                    cacheRect[y][x] = last_x_value + 1
                 }
             }
         }
     }
     // 然后, 从第二排开始比较
     // 比较原则:
-    // 若两个char相等, 则取左侧上侧中较小值
-    // 若两个char不等, 则取左侧上侧中较大值
+    // 若两个char相等, 则取左侧上侧中较小值 + 0(新增值不需要添加额外操作)
+    // 若两个char不等, 则取左侧上侧中较小值 + 1
     for (let x = 1; x < x_word1Length; x++) {
         for (let y = 1; y < y_word2Length; y++) {
             let xChar = word1[x]
             let yChar = word2[y]
             if (xChar === yChar) {
-                cacheRect[y][x] = Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1])
+                cacheRect[y][x] = Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1])
             } else {
-                cacheRect[y][x] = Math.max(cacheRect[y - 1][x], cacheRect[y][x - 1])
+                cacheRect[y][x] = Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1]) + 1
             }
         }
     }
 
-    console.log(cacheRect)
+    let rectStr = ''
+    for (let line of cacheRect) {
+        rectStr += line.map(item => `${item}`.padEnd(2, ' ')).join(" ") + '\n'
+    }
+    console.log(rectStr)
 
     return cacheRect[y_word2Length - 1][x_word1Length - 1];
 };
@@ -81,14 +97,49 @@ function minDistance(word1: string, word2: string): number {
 let testCaseList = [
     {
         inputList: [
-            "ABCDEB",
-            "ABCDEB",
+            "ABCDG",
+            "ABCD",
+        ],
+        output: 1
+    },
+    {
+        inputList: [
+            "intention",
+            "execution",
+        ],
+        output: 5
+    },
+    {
+        inputList: [
+            "",
+            "",
         ],
         output: 0
     },
+    {
+        inputList: [
+            "zoologicoarchaeologist",
+            "zoogeologist"
+        ],
+        output: 10
+    },
+    {
+        inputList: [
+            "_lige",
+            "_ge"
+        ],
+        output: 2
+    },
+    {
+        inputList: [
+            "ilige",
+            "ige"
+        ],
+        output: 2
+    },
 ]
 
-// testCaseList = [testCaseList[0]]
+testCaseList = [testCaseList[testCaseList.length - 1]]
 
 let counter = -1
 for (let testCase of testCaseList) {
@@ -97,7 +148,7 @@ for (let testCase of testCaseList) {
     // @ts-ignore
     let result = minDistance(...testCase.inputList)
     if (result !== testCase.output) {
-        console.warn(`🤦‍♂️第${counter}项测试失败, input:${testCase.inputList}, output: ${testCase.output}, 实际回答: ${result} `)
+        console.warn(`🤦‍♂️第${counter}项测试失败, input:${testCase.inputList}, 预期值: ${testCase.output}, 实际回答: ${result} `)
     } else {
         console.info(`🎉第${counter} 项测试成功`)
     }
