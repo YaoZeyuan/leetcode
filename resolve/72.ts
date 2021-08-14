@@ -35,17 +35,25 @@ function minDistance(word1: string, word2: string): number {
     // 首先, 初始化(0,y) 和 (x, 0)内的值. 第一排只有一个字母, 所以容易计算
     // 若两个char相等, 则取左侧值
     // 若两个char不等, 则取左侧值+1
+
+    // x/y只能用一次
+    let x_has_use = false
+    let y_has_use = false
+
     for (let x = 0; x < x_word1Length; x++) {
         for (let y = 0; y < y_word2Length; y++) {
             if (x === 0) {
                 let xChar = word1[x]
                 let yChar = word2[y]
 
-                let y_has_use = (cacheRect?.[y - 1]?.[x] || 0) !== (y + 1) && y !== 0
                 let last_y_value = cacheRect?.[y - 1]?.[x] || 0
 
                 if (xChar === yChar && y_has_use === false) {
                     cacheRect[y][x] = last_y_value
+                    y_has_use = true
+                    if (y === 0) {
+                        x_has_use = true
+                    }
                 } else {
                     cacheRect[y][x] = last_y_value + 1
                 }
@@ -54,11 +62,11 @@ function minDistance(word1: string, word2: string): number {
                 if (y === 0) {
                     let xChar = word1[x]
                     let yChar = word2[y]
-                    let x_has_use = (cacheRect?.[y]?.[x - 1] || 0) !== (x + 1) && x !== 0
 
                     let last_x_value = cacheRect?.[y]?.[x - 1] || 0
                     if (xChar === yChar && x_has_use === false) {
                         cacheRect[y][x] = last_x_value
+                        x_has_use = true
                     } else {
                         cacheRect[y][x] = last_x_value + 1
                     }
@@ -146,6 +154,15 @@ let testCaseList = [
         inputList: [
             "itt",
             "eet",
+        ],
+        output: 2
+    },
+
+
+    {
+        inputList: [
+            "sea",
+            "eat"
         ],
         output: 2
     },
