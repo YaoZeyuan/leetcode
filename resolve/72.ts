@@ -41,42 +41,45 @@ function minDistance(word1: string, word2: string): number {
                 let xChar = word1[x]
                 let yChar = word2[y]
 
-                let y_has_use = (cacheRect?.[y - 1]?.[x] || 0) === y - 1
+                let y_has_use = (cacheRect?.[y - 1]?.[x] || 0) !== (y + 1) && y !== 0
                 let last_y_value = cacheRect?.[y - 1]?.[x] || 0
 
-                // 需要判断之前该值是否被用过. 若字母已被匹配过, 则仍然要+1
                 if (xChar === yChar && y_has_use === false) {
                     cacheRect[y][x] = last_y_value
                 } else {
                     cacheRect[y][x] = last_y_value + 1
                 }
-            }
-            if (y === 0) {
-                let xChar = word1[x]
-                let yChar = word2[y]
-                let x_has_use = (cacheRect?.[y]?.[x - 1] || 0) === x - 1
+            } else {
 
-                let last_x_value = cacheRect?.[y]?.[x - 1] || 0
-                if (xChar === yChar && x_has_use === false) {
-                    cacheRect[y][x] = last_x_value
-                } else {
-                    cacheRect[y][x] = last_x_value + 1
+                if (y === 0) {
+                    let xChar = word1[x]
+                    let yChar = word2[y]
+                    let x_has_use = (cacheRect?.[y]?.[x - 1] || 0) !== (x + 1) && x !== 0
+
+                    let last_x_value = cacheRect?.[y]?.[x - 1] || 0
+                    if (xChar === yChar && x_has_use === false) {
+                        cacheRect[y][x] = last_x_value
+                    } else {
+                        cacheRect[y][x] = last_x_value + 1
+                    }
                 }
             }
+
         }
     }
     // 然后, 从第二排开始比较
     // 比较原则:
-    // 若两个char相等, 则取左侧上侧中较小值 + 0(新增值不需要添加额外操作)
-    // 若两个char不等, 则取左侧上侧中较小值 + 1
+    // 若两个char相等, 则取min([x-1][y-1] -1, [x-1][y], [x][y-1]) + 1
+    // 若两个char不等, 则取min([x-1][y-1], [x-1][y], [x][y-1]) + 1
     for (let x = 1; x < x_word1Length; x++) {
         for (let y = 1; y < y_word2Length; y++) {
             let xChar = word1[x]
             let yChar = word2[y]
+
             if (xChar === yChar) {
-                cacheRect[y][x] = Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1])
+                cacheRect[y][x] = 1 + Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1] - 1)
             } else {
-                cacheRect[y][x] = Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1]) + 1
+                cacheRect[y][x] = 1 + Math.min(cacheRect[y - 1][x], cacheRect[y][x - 1], cacheRect[y - 1][x - 1])
             }
         }
     }
@@ -85,7 +88,7 @@ function minDistance(word1: string, word2: string): number {
     for (let line of cacheRect) {
         rectStr += line.map(item => `${item}`.padEnd(2, ' ')).join(" ") + '\n'
     }
-    console.log(rectStr)
+    // console.log(rectStr)
 
     return cacheRect[y_word2Length - 1][x_word1Length - 1];
 };
@@ -130,6 +133,23 @@ let testCaseList = [
         ],
         output: 2
     },
+
+    {
+        inputList: [
+            // "zoologicoarchaeologist",
+            "zolo",
+            "zo"
+        ],
+        output: 2
+    },
+    {
+        inputList: [
+            "itt",
+            "eet",
+        ],
+        output: 2
+    },
+
     {
         inputList: [
             "ilige",
@@ -139,7 +159,7 @@ let testCaseList = [
     },
 ]
 
-testCaseList = [testCaseList[testCaseList.length - 1]]
+// testCaseList = [testCaseList[testCaseList.length - 1]]
 
 let counter = -1
 for (let testCase of testCaseList) {
