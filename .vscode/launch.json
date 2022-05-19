@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "启动ts程序",
+      "name": "debug当前文件",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
       "outFiles": ["${workspaceFolder}/dist/*.js"]
