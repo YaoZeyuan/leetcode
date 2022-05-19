@@ -21,5 +21,6 @@
     "@babel/cli": "^7",
     "@babel/core": "^7",
     "@babel/preset-typescript": "^7"
-  }
+  },
+  "dependencies": {}
 }
