@@ -10,8 +10,7 @@
       "name": "debug当前文件",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
-      "outFiles": ["${workspaceFolder}/dist/*.js"],
-      "runtimeArgs": ["-r", "ts-node/register"]
+      "outFiles": ["${workspaceFolder}/dist/*.js"]
     }
   ]
 }
