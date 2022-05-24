@@ -10,7 +10,7 @@
       "name": "debug当前文件",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
-      "outFiles": ["${workspaceFolder}/dist/*.js"]
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }
