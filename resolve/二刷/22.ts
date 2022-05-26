@@ -15,7 +15,7 @@ function generateParenthesis(n: number): string[] {
     // 首先需要一个工具函数, 解析出指定字符串中, 所有匹配()的单元位置
     function getAllMatchPairPosPair(inputStr = '()') {
         let posStack = []
-        let pariList: {
+        let pairList: {
             left: number
             right: number
         }[] = []
@@ -26,21 +26,21 @@ function generateParenthesis(n: number): string[] {
                 // 出栈
                 let leftPos = posStack.pop()
                 let rightPos = pos
-                pariList.push({
+                pairList.push({
                     left: leftPos,
                     right: rightPos,
                 })
             }
         }
-        return pariList
+        return pairList
     }
 
     // 结果集
     let resultSet = new Set<string>()
     // 拿到所有单元位置后, 对每一个单元执行 ()A, (A), A() 操作
     for (let subStr of subList) {
-        let posPariList = getAllMatchPairPosPair(subStr)
-        for (let posPair of posPariList) {
+        let posPairList = getAllMatchPairPosPair(subStr)
+        for (let posPair of posPairList) {
             resultSet.add(`${subStr.slice(0, posPair.left)}()${subStr.slice(posPair.left, posPair.right)}${subStr.slice(posPair.right)}`)
             resultSet.add(`${subStr.slice(0, posPair.left)}(${subStr.slice(posPair.left, posPair.right)})${subStr.slice(posPair.right)}`)
             resultSet.add(`${subStr.slice(0, posPair.left)}${subStr.slice(posPair.left, posPair.right)}()${subStr.slice(posPair.right)}`)

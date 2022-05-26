@@ -22,7 +22,7 @@ function threeSum(nums: number[]): number[][] {
   /**
    * 指定起始位置, 快速查找三数和
    */
-  function generatePariList(startCheckPos = 0) {
+  function generatePairList(startCheckPos = 0) {
     let remainList = nums.slice(startCheckPos + 1);
     let baseNum = nums[startCheckPos];
     if (remainList.length < 2) {
@@ -56,7 +56,7 @@ function threeSum(nums: number[]): number[][] {
   }
   // 进行检测
   for (let pos = 0; pos < nums.length; pos = pos + 1) {
-    generatePariList(pos);
+    generatePairList(pos);
   }
   return [...answerMap.values()];
 }
