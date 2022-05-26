@@ -33,6 +33,7 @@ function divide(dividend: number, divisor: number): number {
     // 1.   被除数 > 除数 * 2
     // 2.   被除数 > 除数 * 2
 
+    // 工具函数: 找到最接近被除数1/2需要的乘以的次数, 以及剩余的余数
     function getNearestTimesAndRemain(
         targetNum: number,
         baseNum: number,
@@ -74,6 +75,7 @@ function divide(dividend: number, divisor: number): number {
 
         let remain = inputDividend
         let result = 0
+        // 不停找到被除数对半需要的times和余数, 直到余数小于除数, 此时times之和即为商
         while (remain >= inputDivisor) {
             let { val: currentResult, remain: currentRemain } = getNearestTimesAndRemain(remain, inputDivisor)
             result = result + currentResult
