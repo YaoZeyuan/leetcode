@@ -12,4 +12,4 @@ function rotate(nums: number[], k: number): void {
     return
 }
 
-console.log(rotate([0, 1, 2, 3, 4, 5], 20))
+// console.log(rotate([0, 1, 2, 3, 4, 5], 20))
