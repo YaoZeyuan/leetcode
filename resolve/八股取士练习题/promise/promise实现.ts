@@ -12,7 +12,80 @@ const Const_State_Rejected = 'rejected' as const
 
 type Type_State = typeof Const_State_Fulfilled | typeof Const_State_Pending | typeof Const_State_Rejected
 
-function resolvePromise(promise2, x, resolve: Function, reject: Function) {}
+/**
+ * 根据x的最终状态, 决定promise2的最终状态
+ * @param promise2
+ * @param x
+ * @param resolve
+ * @param reject
+ */
+function resolvePromise(promise2, x, resolve: Function, reject: Function) {
+    // 参数检测: 不能循环引用
+    if (x === promise2) {
+        throw new Error('循环引用')
+    }
+    if (x instanceof MyPromise) {
+        // 为MyPromise的子对象
+        switch (x.state) {
+            // 待处理
+            case Const_State_Pending: {
+                x.then(
+                    (nextX) => {
+                        resolvePromise(promise2, nextX, resolve, reject)
+                    },
+                    (nextReason) => {
+                        reject(nextReason)
+                    },
+                )
+            }
+            case Const_State_Fulfilled:
+            case Const_State_Rejected:
+            default: {
+                // 状态已凝固
+                x.then(resolve, reject)
+            }
+        }
+    } else if (x && (typeof x === 'function' || typeof x === 'object')) {
+        // 假设x为thenable对象
+        // 保证只调用过一次
+        let hasCalled = false
+        try {
+            let thenFunc = x.then
+
+            if (typeof thenFunc === 'function') {
+                thenFunc.call(
+                    x,
+                    (thenValue) => {
+                        if (hasCalled) {
+                            return
+                        }
+                        hasCalled = true
+                        resolvePromise(promise2, thenValue, resolve, reject)
+                    },
+                    (thenReason) => {
+                        if (hasCalled) {
+                            return
+                        }
+                        hasCalled = true
+                        reject(thenReason)
+                    },
+                )
+            } else {
+                // 普通值, 直接返回即可
+                resolve(x)
+            }
+        } catch (e) {
+            if (hasCalled) {
+                return
+            }
+            hasCalled = true
+            reject(e)
+        }
+    } else {
+        // 普通值, 直接返回即可
+        resolve(x)
+    }
+}
 
 class MyPromise {
     // 初始状态
